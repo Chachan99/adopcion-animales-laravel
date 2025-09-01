@@ -4,17 +4,24 @@ echo "=== INICIANDO SERVICIOS EN RENDER ==="
 
 # Verificar si PHP-FPM está configurado
 echo "Verificando configuración de PHP-FPM..."
-if [ ! -f "/etc/php82/php-fpm.d/www.conf" ]; then
+
+# Buscar configuración de PHP-FPM
+PHP_FPM_CONF_DIR=$(find /etc -name "php-fpm.d" 2>/dev/null | head -1)
+PHP_FPM_WWW_CONF=$(find /etc -name "www.conf" 2>/dev/null | head -1)
+
+if [ -n "$PHP_FPM_WWW_CONF" ]; then
+    echo "✅ Configuración de PHP-FPM encontrada en: $PHP_FPM_WWW_CONF"
+else
     echo "❌ Configuración de PHP-FPM no encontrada"
-    # Crear configuración básica
-    mkdir -p /etc/php82/php-fpm.d/
-    cat > /etc/php82/php-fpm.d/www.conf << 'EOF'
+    # Intentar crear configuración básica
+    if [ -n "$PHP_FPM_CONF_DIR" ]; then
+        cat > "$PHP_FPM_CONF_DIR/www.conf" << 'EOF'
 [www]
-user = www-data
-group = www-data
+user = nginx
+group = nginx
 listen = /var/run/php-fpm.sock
-listen.owner = www-data
-listen.group = www-data
+listen.owner = nginx
+listen.group = nginx
 listen.mode = 0660
 pm = dynamic
 pm.max_children = 5
@@ -22,8 +29,8 @@ pm.start_servers = 2
 pm.min_spare_servers = 1
 pm.max_spare_servers = 3
 EOF
-else
-    echo "✅ Configuración de PHP-FPM encontrada"
+        echo "✅ Configuración básica creada"
+    fi
 fi
 
 # Crear directorio para socket si no existe
@@ -32,7 +39,7 @@ chown www-data:www-data /var/run
 
 # Iniciar PHP-FPM manualmente
 echo "Iniciando PHP-FPM..."
-php-fpm82 -D
+php-fpm -D
 
 # Verificar que el socket se creó
 if [ -S "/var/run/php-fpm.sock" ]; then
@@ -42,9 +49,13 @@ else
     echo "❌ Error: Socket PHP-FPM no se creó"
     echo "Intentando iniciar PHP-FPM en modo TCP..."
     # Fallback a TCP
-    sed -i 's|listen = /var/run/php-fpm.sock|listen = 127.0.0.1:9000|g' /etc/php82/php-fpm.d/www.conf
-    pkill php-fpm82
-    php-fpm82 -D
+    # Buscar archivo de configuración de PHP-FPM
+    PHP_FPM_CONF=$(find /etc -name "www.conf" 2>/dev/null | head -1)
+    if [ -n "$PHP_FPM_CONF" ]; then
+        sed -i 's|listen = /var/run/php-fpm.sock|listen = 127.0.0.1:9000|g' "$PHP_FPM_CONF"
+    fi
+    pkill php-fpm 2>/dev/null || true
+    php-fpm -D
     
     # Actualizar nginx para usar TCP
     sed -i 's|fastcgi_pass unix:/var/run/php-fpm.sock|fastcgi_pass 127.0.0.1:9000|g' /etc/nginx/nginx.conf
