@@ -11,13 +11,11 @@ APP_DEBUG=false
 APP_URL=https://adopcion-animales-app.onrender.com
 
 # Base de Datos PostgreSQL
-# IMPORTANTE: Usar los valores extraídos de tu Internal Database URL
+# IMPORTANTE: Render proporciona automáticamente DATABASE_URL
+# NO necesitas configurar DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD individualmente
+# Solo usa DATABASE_URL que Render genera automáticamente
 DB_CONNECTION=pgsql
-DB_HOST=dpg-ctbhqhaj1k6c73a6rnag-a.oregon-postgres.render.com
-DB_PORT=5432
-DB_DATABASE=adopcion_animales_db_7ixe
-DB_USERNAME=adopcion_animales_db_7ixe_user
-DB_PASSWORD=tu_password_de_la_url_interna
+# DATABASE_URL se configura automáticamente por Render - NO la agregues manualmente
 
 # Cache y Sesiones
 BROADCAST_DRIVER=log

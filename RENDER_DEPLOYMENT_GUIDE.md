@@ -251,7 +251,11 @@ Para generar una nueva `APP_KEY`:
 **Causas más comunes**:
 1. **APP_KEY no configurada**: Laravel requiere una clave de aplicación
 2. **Variables de entorno faltantes**: DB_HOST, DB_PASSWORD, etc.
-3. **Base de datos no conectada**: Credenciales incorrectas
+3. **Base de datos no conectada**: 
+   - Render proporciona automáticamente `DATABASE_URL`
+   - NO configures manualmente `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
+   - Solo asegúrate de tener `DB_CONNECTION=pgsql` configurado
+   - La variable `DATABASE_URL` se genera automáticamente cuando vinculas una base de datos PostgreSQL
 4. **Migraciones no ejecutadas**: Tablas no creadas
 
 **Solución paso a paso**:
