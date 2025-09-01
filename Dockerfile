@@ -41,21 +41,16 @@ RUN php artisan storage:link || true
 # Copiar scripts de configuración
 COPY render-setup.php ./
 COPY check-database.php ./
+COPY start-render.sh /start-render.sh
 
 # Configurar Nginx para puerto 8080 (requerido por Render)
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 
-# Crear script de inicio personalizado
-RUN echo '#!/bin/bash' > /render-start.sh && \
-    echo 'echo "=== INICIANDO APLICACIÓN EN RENDER ===" ' >> /render-start.sh && \
-    echo 'echo "Configurando base de datos..." ' >> /render-start.sh && \
-    echo 'php /var/www/html/render-setup.php' >> /render-start.sh && \
-    echo 'echo "Iniciando servicios..." ' >> /render-start.sh && \
-    echo 'exec /start.sh' >> /render-start.sh && \
-    chmod +x /render-start.sh
+# Hacer ejecutable el script de inicio
+RUN chmod +x /start-render.sh
 
 # Exponer puerto 8080
 EXPOSE 8080
 
 # Comando de inicio personalizado
-CMD ["/render-start.sh"]
+CMD ["/start-render.sh"]
