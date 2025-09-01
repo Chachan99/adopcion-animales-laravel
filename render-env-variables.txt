@@ -1,0 +1,61 @@
+# VARIABLES DE ENTORNO PARA RENDER.COM
+# Configurar estas variables en: Dashboard → Tu Web Service → Environment
+
+# ===== VARIABLES CRÍTICAS (OBLIGATORIAS) =====
+
+# Aplicación
+APP_NAME=Adopción de Animales
+APP_ENV=production
+APP_KEY=base64:55pudw9DlPD6gUgCqfAy3uM4O8IjWQaaqYzhWFFNaYE=
+APP_DEBUG=false
+APP_URL=https://adopcion-animales-app.onrender.com
+
+# Base de Datos PostgreSQL
+# IMPORTANTE: Usar los valores extraídos de tu Internal Database URL
+DB_CONNECTION=pgsql
+DB_HOST=dpg-ctbhqhaj1k6c73a6rnag-a.oregon-postgres.render.com
+DB_PORT=5432
+DB_DATABASE=adopcion_animales_db_7ixe
+DB_USERNAME=adopcion_animales_db_7ixe_user
+DB_PASSWORD=tu_password_de_la_url_interna
+
+# Cache y Sesiones
+BROADCAST_DRIVER=log
+CACHE_DRIVER=file
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=sync
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+
+# Logging
+LOG_CHANNEL=stack
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=error
+
+# Render específico
+PORT=8080
+NODE_ENV=production
+
+# ===== VARIABLES OPCIONALES =====
+
+# Email (configurar solo si necesitas envío de emails)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=tu-email@gmail.com
+MAIL_PASSWORD=tu-app-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=tu-email@gmail.com
+MAIL_FROM_NAME=Adopción de Animales
+
+# ===== INSTRUCCIONES =====
+# 1. Ve a tu Web Service en Render Dashboard
+# 2. Haz clic en "Environment" en el menú lateral
+# 3. Agrega cada variable una por una (sin comillas)
+# 4. Guarda los cambios
+# 5. Render redesplegará automáticamente
+
+# NOTA IMPORTANTE:
+# - NO incluyas comillas en los valores en Render
+# - Asegúrate de usar el password correcto de tu Internal Database URL
+# - La APP_KEY ya está generada y lista para usar

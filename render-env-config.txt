@@ -1,0 +1,114 @@
+# Variables de Entorno para Render.com
+# Copia estas variables en la sección "Environment" de tu Web Service en Render
+
+# === CONFIGURACIÓN BÁSICA DE LA APLICACIÓN ===
+APP_NAME=Adopción de Animales
+APP_ENV=production
+APP_KEY=GENERA_UNA_NUEVA_CLAVE_AQUI
+APP_DEBUG=false
+APP_TIMEZONE=America/Mexico_City
+APP_URL=https://TU-APP-NAME.onrender.com
+
+APP_LOCALE=es
+APP_FALLBACK_LOCALE=es
+APP_FAKER_LOCALE=es_ES
+
+APP_MAINTENANCE_DRIVER=file
+APP_MAINTENANCE_STORE=database
+
+BCRYPT_ROUNDS=12
+
+# === CONFIGURACIÓN DE LOGS ===
+LOG_CHANNEL=stack
+LOG_STACK=single
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=error
+
+# === CONFIGURACIÓN DE BASE DE DATOS ===
+# IMPORTANTE: Reemplaza estos valores con los de tu base de datos PostgreSQL en Render
+DB_CONNECTION=pgsql
+DB_HOST=REEMPLAZA_CON_TU_DB_HOST
+DB_PORT=5432
+DB_DATABASE=adopcion_animales
+DB_USERNAME=REEMPLAZA_CON_TU_DB_USERNAME
+DB_PASSWORD=REEMPLAZA_CON_TU_DB_PASSWORD
+
+# === CONFIGURACIÓN DE SESIONES ===
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=false
+SESSION_PATH=/
+SESSION_DOMAIN=null
+
+# === CONFIGURACIÓN DE CACHE Y COLA ===
+BROADCAST_CONNECTION=log
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+CACHE_STORE=database
+CACHE_PREFIX=
+
+# === CONFIGURACIÓN DE REDIS (OPCIONAL) ===
+MEMCACHED_HOST=127.0.0.1
+REDIS_CLIENT=phpredis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+# === CONFIGURACIÓN DE EMAIL ===
+MAIL_MAILER=log
+MAIL_HOST=127.0.0.1
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS=hello@example.com
+MAIL_FROM_NAME=${APP_NAME}
+
+# === CONFIGURACIÓN DE AWS (OPCIONAL) ===
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+# === CONFIGURACIÓN DE VITE ===
+VITE_APP_NAME=${APP_NAME}
+
+# === CONFIGURACIÓN ESPECÍFICA DE RENDER ===
+PORT=8080
+RENDER=true
+
+# ========================================
+# INSTRUCCIONES IMPORTANTES:
+# ========================================
+
+# 1. GENERAR APP_KEY:
+#    - Opción A: Ejecuta localmente: php artisan key:generate --show
+#    - Opción B: Ve a: https://generate-random.org/laravel-key-generator
+#    - La clave debe empezar con "base64:"
+
+# 2. CONFIGURAR BASE DE DATOS:
+#    - Crea una base de datos PostgreSQL en Render
+#    - Ve a la pestaña "Info" de tu base de datos
+#    - Copia la "Internal Database URL"
+#    - Extrae los componentes:
+#      postgresql://usuario:password@host/database
+#      DB_HOST = host
+#      DB_USERNAME = usuario
+#      DB_PASSWORD = password
+#      DB_DATABASE = database
+
+# 3. CONFIGURAR APP_URL:
+#    - Reemplaza "TU-APP-NAME" con el nombre real de tu aplicación en Render
+#    - Ejemplo: https://adopcion-animales-app.onrender.com
+
+# 4. CONFIGURACIÓN EN RENDER:
+#    - Ve a tu Web Service en Render
+#    - Sección "Environment"
+#    - Agrega cada variable una por una
+#    - NO incluyas las líneas que empiezan con #
+
+# 5. VERIFICAR DESPLIEGUE:
+#    - Después de configurar, haz "Manual Deploy"
+#    - Revisa los logs para verificar que no hay errores
+#    - Accede a tu aplicación en la URL proporcionada
