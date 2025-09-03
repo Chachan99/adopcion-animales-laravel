@@ -142,6 +142,72 @@ fi
 
 php /var/www/html/render-setup.php
 
+# Configurar Nginx
+echo "Configurando Nginx..."
+
+# Copiar configuración personalizada si existe
+if [ -f "/var/www/html/docker/nginx.conf" ]; then
+    echo "📋 Copiando configuración personalizada de Nginx..."
+    cp /var/www/html/docker/nginx.conf /etc/nginx/nginx.conf
+    echo "✅ Configuración personalizada aplicada"
+else
+    echo "⚠️ No se encontró configuración personalizada, usando configuración por defecto"
+fi
+
+# Verificar configuración de Nginx
+echo "🔍 Verificando configuración de Nginx..."
+if nginx -t; then
+    echo "✅ Configuración de Nginx válida"
+else
+    echo "❌ Error en configuración de Nginx"
+    echo "📋 Contenido de nginx.conf:"
+    cat /etc/nginx/nginx.conf
+    echo "📋 Logs de error de Nginx:"
+    tail -20 /var/log/nginx/error.log 2>/dev/null || echo "No hay logs de error disponibles"
+    exit 1
+fi
+
+# Verificar que los directorios necesarios existan
+echo "🔍 Verificando directorios necesarios..."
+mkdir -p /var/log/nginx
+mkdir -p /var/run
+touch /var/run/nginx.pid
+chmod 644 /var/run/nginx.pid
+echo "✅ Directorios de Nginx configurados"
+
+# Verificar que PHP-FPM esté respondiendo antes de iniciar Nginx
+echo "🔍 Verificando conectividad con PHP-FPM..."
+# Usar timeout y curl como alternativa a nc si no está disponible
+if command -v nc >/dev/null 2>&1; then
+    if nc -z 127.0.0.1 9001; then
+        echo "✅ PHP-FPM responde en puerto 9001 (nc)"
+    else
+        echo "❌ PHP-FPM no responde en puerto 9001 (nc)"
+    fi
+elif command -v timeout >/dev/null 2>&1; then
+    if timeout 3 bash -c "</dev/tcp/127.0.0.1/9001"; then
+        echo "✅ PHP-FPM responde en puerto 9001 (timeout)"
+    else
+        echo "❌ PHP-FPM no responde en puerto 9001 (timeout)"
+    fi
+else
+    echo "⚠️ No se puede verificar conectividad (nc/timeout no disponibles)"
+fi
+
+echo "📋 Procesos PHP-FPM:"
+ps aux | grep php-fpm || echo "No hay procesos PHP-FPM"
+echo "📋 Puertos en uso:"
+netstat -tlnp | grep :900 || echo "No hay puertos 900x en uso"
+echo "📋 Todos los puertos en uso:"
+netstat -tlnp | head -10 || echo "No se puede mostrar puertos"
+
 # Iniciar Nginx
-echo "Iniciando Nginx..."
-nginx -g "daemon off;"
+echo "🚀 Iniciando Nginx..."
+if nginx -g "daemon off;"; then
+    echo "✅ Nginx iniciado correctamente"
+else
+    echo "❌ Error al iniciar Nginx"
+    echo "📋 Logs de error de Nginx:"
+    tail -50 /var/log/nginx/error.log 2>/dev/null || echo "No hay logs de error disponibles"
+    exit 1
+fi
