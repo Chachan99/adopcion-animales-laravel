@@ -70,6 +70,17 @@ try {
         echo "    4. DB_DATABASE: " . (getenv('DB_DATABASE') ?: 'no configurado') . "\n";
         echo "    5. DB_USERNAME: " . (getenv('DB_USERNAME') ? '✅' : '❌') . "\n";
         echo "    6. DB_PASSWORD: " . (getenv('DB_PASSWORD') ? '✅' : '❌') . "\n";
+        
+        if (!getenv('DATABASE_URL')) {
+            echo "\n📋 INSTRUCCIONES PARA CONFIGURAR DATABASE_URL:\n";
+            echo "    1. Ve a https://dashboard.render.com\n";
+            echo "    2. Crea un nuevo servicio PostgreSQL\n";
+            echo "    3. Copia la 'Internal Database URL'\n";
+            echo "    4. Agrégala como variable de entorno DATABASE_URL\n";
+            echo "    5. Redeploy la aplicación\n";
+            echo "    \n";
+            echo "    Ver RENDER_DATABASE_SETUP.md para instrucciones detalladas\n";
+        }
         throw $e;
     }
     

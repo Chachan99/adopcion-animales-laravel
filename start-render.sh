@@ -9,56 +9,58 @@ echo "Verificando configuración de PHP-FPM..."
 PHP_FPM_CONF_DIR=$(find /etc -name "php-fpm.d" 2>/dev/null | head -1)
 PHP_FPM_WWW_CONF=$(find /etc -name "www.conf" 2>/dev/null | head -1)
 
+# Forzar configuración TCP en puerto 9001 para evitar conflictos
 if [ -n "$PHP_FPM_WWW_CONF" ]; then
     echo "✅ Configuración de PHP-FPM encontrada en: $PHP_FPM_WWW_CONF"
+    # Cambiar a puerto 9001 inmediatamente
+    sed -i 's|listen = .*|listen = 127.0.0.1:9001|g' "$PHP_FPM_WWW_CONF"
+    echo "✅ PHP-FPM configurado para usar puerto 9001"
 else
     echo "❌ Configuración de PHP-FPM no encontrada"
-    # Intentar crear configuración básica
+    # Intentar crear configuración básica con puerto TCP
     if [ -n "$PHP_FPM_CONF_DIR" ]; then
         cat > "$PHP_FPM_CONF_DIR/www.conf" << 'EOF'
 [www]
 user = nginx
 group = nginx
-listen = /var/run/php-fpm.sock
-listen.owner = nginx
-listen.group = nginx
-listen.mode = 0660
+listen = 127.0.0.1:9001
 pm = dynamic
 pm.max_children = 5
 pm.start_servers = 2
 pm.min_spare_servers = 1
 pm.max_spare_servers = 3
 EOF
-        echo "✅ Configuración básica creada"
+        echo "✅ Configuración básica creada con puerto 9001"
     fi
 fi
 
-# Crear directorio para socket si no existe
-mkdir -p /var/run
-chown www-data:www-data /var/run
+# Buscar y actualizar TODAS las configuraciones de PHP-FPM
+find /etc -name "*.conf" -path "*/php*" -exec sed -i 's|listen = 127.0.0.1:9000|listen = 127.0.0.1:9001|g' {} \;
+find /etc -name "*.conf" -path "*/php*" -exec sed -i 's|listen = 9000|listen = 127.0.0.1:9001|g' {} \;
 
-# Iniciar PHP-FPM manualmente
-echo "Iniciando PHP-FPM..."
+# Asegurar que Nginx esté configurado para TCP
+echo "Configurando Nginx para usar TCP..."
+sed -i 's|fastcgi_pass unix:/var/run/php-fpm.sock|fastcgi_pass 127.0.0.1:9001|g' /etc/nginx/nginx.conf
+sed -i 's|fastcgi_pass 127.0.0.1:9000|fastcgi_pass 127.0.0.1:9001|g' /etc/nginx/nginx.conf
+
+# Matar cualquier proceso PHP-FPM existente
+echo "Deteniendo procesos PHP-FPM existentes..."
+pkill php-fpm 2>/dev/null || true
+sleep 2
+
+# Iniciar PHP-FPM en modo TCP
+echo "Iniciando PHP-FPM en puerto 9001..."
 php-fpm -D
 
-# Verificar que el socket se creó
-if [ -S "/var/run/php-fpm.sock" ]; then
-    echo "✅ Socket PHP-FPM creado correctamente"
-    ls -la /var/run/php-fpm.sock
+# Verificar que PHP-FPM esté corriendo
+sleep 3
+if pgrep php-fpm > /dev/null; then
+    echo "✅ PHP-FPM iniciado correctamente"
+    netstat -tlnp | grep :9001 || echo "⚠️ Puerto 9001 no visible en netstat"
 else
-    echo "❌ Error: Socket PHP-FPM no se creó"
-    echo "Intentando iniciar PHP-FPM en modo TCP..."
-    # Fallback a TCP
-    # Buscar archivo de configuración de PHP-FPM
-    PHP_FPM_CONF=$(find /etc -name "www.conf" 2>/dev/null | head -1)
-    if [ -n "$PHP_FPM_CONF" ]; then
-        sed -i 's|listen = /var/run/php-fpm.sock|listen = 127.0.0.1:9001|g' "$PHP_FPM_CONF"
-    fi
-    pkill php-fpm 2>/dev/null || true
-    php-fpm -D
-    
-    # Actualizar nginx para usar TCP
-    sed -i 's|fastcgi_pass unix:/var/run/php-fpm.sock|fastcgi_pass 127.0.0.1:9001|g' /etc/nginx/nginx.conf
+    echo "❌ Error: PHP-FPM no se pudo iniciar"
+    # Mostrar logs para debug
+    tail -20 /var/log/php*fpm* 2>/dev/null || echo "No se encontraron logs de PHP-FPM"
 fi
 
 # Ejecutar configuración de base de datos
