@@ -14,8 +14,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminSeeder::class,
-            NoticiasTableSeeder::class,
-            AnimalesTableSeeder::class,
         ]);
     }
 }
