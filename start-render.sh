@@ -2,16 +2,45 @@
 
 echo "=== INICIANDO SERVICIOS EN RENDER ==="
 
-# Verificar driver PostgreSQL
+# Verificar y configurar driver PostgreSQL
 echo "Verificando driver PostgreSQL..."
+echo "📋 Módulos PHP disponibles:"
+php -m | grep -i pdo || echo "❌ No se encontraron módulos PDO"
+php -m | grep -i pgsql || echo "❌ No se encontraron módulos PostgreSQL"
+
 if php -m | grep -q pdo_pgsql; then
-    echo "✅ Driver PostgreSQL disponible"
+    echo "✅ Driver PostgreSQL (pdo_pgsql) disponible"
 else
     echo "❌ Driver PostgreSQL no encontrado"
-    echo "🔧 Intentando cargar extensión..."
-    # Intentar cargar la extensión si está compilada pero no cargada
-    echo "extension=pdo_pgsql" >> /usr/local/etc/php/conf.d/pgsql.ini 2>/dev/null || true
-    echo "extension=pgsql" >> /usr/local/etc/php/conf.d/pgsql.ini 2>/dev/null || true
+    echo "🔧 Intentando configurar extensiones..."
+    
+    # Crear directorio de configuración si no existe
+    mkdir -p /usr/local/etc/php/conf.d/
+    
+    # Agregar extensiones PostgreSQL
+    echo "extension=pdo" > /usr/local/etc/php/conf.d/pgsql.ini
+    echo "extension=pgsql" >> /usr/local/etc/php/conf.d/pgsql.ini
+    echo "extension=pdo_pgsql" >> /usr/local/etc/php/conf.d/pgsql.ini
+    
+    echo "✅ Configuración de extensiones PostgreSQL agregada"
+     
+     # Reiniciar PHP-FPM para cargar las nuevas extensiones
+     echo "🔄 Reiniciando PHP-FPM para cargar extensiones..."
+     pkill php-fpm 2>/dev/null || true
+     sleep 2
+     
+     # Verificar nuevamente
+     echo "🔄 Verificando extensiones después de configuración..."
+     php -m | grep -i pdo || echo "⚠️ PDO aún no disponible"
+     php -m | grep -i pgsql || echo "⚠️ PostgreSQL aún no disponible"
+fi
+
+# Verificación final del driver antes de continuar
+echo "🔍 Verificación final del driver PostgreSQL..."
+if php -r "try { new PDO('pgsql:host=localhost'); echo 'PDO PostgreSQL OK'; } catch(Exception \$e) { echo 'Error: ' . \$e->getMessage(); }" 2>/dev/null | grep -q "PDO PostgreSQL OK\|driver"; then
+    echo "✅ Driver PostgreSQL funcional"
+else
+    echo "❌ Driver PostgreSQL no funcional - continuando con diagnósticos"
 fi
 
 # Verificar si PHP-FPM está configurado
@@ -98,6 +127,19 @@ php artisan route:clear || true
 echo "✅ Caché de Laravel optimizada"
 
 echo "Configurando base de datos..."
+
+# Verificación crítica del driver antes de render-setup.php
+echo "🔍 Verificación crítica del driver PostgreSQL antes de configuración..."
+php -r "echo 'Extensiones PDO: '; print_r(PDO::getAvailableDrivers()); echo PHP_EOL;" || echo "❌ Error al verificar drivers PDO"
+
+if php -r "echo in_array('pgsql', PDO::getAvailableDrivers()) ? 'SI' : 'NO';" 2>/dev/null | grep -q "SI"; then
+    echo "✅ Driver pgsql confirmado en PDO"
+else
+    echo "❌ Driver pgsql NO disponible en PDO"
+    echo "🔧 Intentando cargar manualmente..."
+    php -r "dl('pdo_pgsql.so');" 2>/dev/null || echo "⚠️ No se pudo cargar pdo_pgsql.so"
+fi
+
 php /var/www/html/render-setup.php
 
 # Iniciar Nginx
