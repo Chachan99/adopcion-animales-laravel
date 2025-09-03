@@ -125,11 +125,41 @@ cd /var/www/html
 if command -v node >/dev/null 2>&1; then
     echo "✅ Node.js encontrado: $(node --version)"
 else
-    echo "📦 Instalando Node.js..."
-    # Instalar Node.js usando NodeSource repository
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-    apt-get install -y nodejs
-    echo "✅ Node.js instalado: $(node --version)"
+    echo "📦 Instalando Node.js usando método universal..."
+    
+    # Detectar arquitectura
+    ARCH=$(uname -m)
+    case $ARCH in
+        x86_64) NODE_ARCH="x64" ;;
+        aarch64) NODE_ARCH="arm64" ;;
+        *) NODE_ARCH="x64" ;;
+    esac
+    
+    # Descargar e instalar Node.js 18.x
+    NODE_VERSION="18.19.0"
+    NODE_URL="https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz"
+    
+    echo "🔽 Descargando Node.js ${NODE_VERSION} para ${NODE_ARCH}..."
+    curl -fsSL "$NODE_URL" -o node.tar.xz
+    
+    # Extraer e instalar
+    tar -xf node.tar.xz
+    NODE_DIR="node-v${NODE_VERSION}-linux-${NODE_ARCH}"
+    
+    # Copiar binarios a /usr/local/bin
+    cp "$NODE_DIR/bin/node" /usr/local/bin/
+    cp "$NODE_DIR/bin/npm" /usr/local/bin/
+    cp "$NODE_DIR/bin/npx" /usr/local/bin/
+    
+    # Limpiar archivos temporales
+    rm -rf node.tar.xz "$NODE_DIR"
+    
+    # Verificar instalación
+    if command -v node >/dev/null 2>&1; then
+        echo "✅ Node.js instalado correctamente: $(node --version)"
+    else
+        echo "❌ Error al instalar Node.js"
+    fi
 fi
 
 # Verificar si npm está disponible
