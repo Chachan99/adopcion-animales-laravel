@@ -22,14 +22,27 @@ function parseDatabaseUrl() {
         $parsed = parse_url($databaseUrl);
         
         if ($parsed) {
-            putenv('DB_CONNECTION=pgsql');
-            putenv('DB_HOST=' . ($parsed['host'] ?? ''));
-            putenv('DB_PORT=' . ($parsed['port'] ?? '5432'));
-            putenv('DB_DATABASE=' . ltrim($parsed['path'] ?? '', '/'));
-            putenv('DB_USERNAME=' . ($parsed['user'] ?? ''));
-            putenv('DB_PASSWORD=' . ($parsed['pass'] ?? ''));
+            // Configurar tanto putenv() como $_ENV para compatibilidad completa
+            $dbVars = [
+                'DB_CONNECTION' => 'pgsql',
+                'DB_HOST' => $parsed['host'] ?? '',
+                'DB_PORT' => $parsed['port'] ?? '5432',
+                'DB_DATABASE' => ltrim($parsed['path'] ?? '', '/'),
+                'DB_USERNAME' => $parsed['user'] ?? '',
+                'DB_PASSWORD' => $parsed['pass'] ?? ''
+            ];
+            
+            foreach ($dbVars as $key => $value) {
+                putenv($key . '=' . $value);
+                $_ENV[$key] = $value;
+                $_SERVER[$key] = $value;
+            }
             
             echo "✅ Variables de base de datos configuradas desde DATABASE_URL\n";
+            echo "🔍 DB_HOST configurado: " . $_ENV['DB_HOST'] . "\n";
+            echo "🔍 DB_DATABASE configurado: " . $_ENV['DB_DATABASE'] . "\n";
+            echo "🔍 DB_USERNAME configurado: " . ($_ENV['DB_USERNAME'] ? 'CONFIGURADO' : 'NO CONFIGURADO') . "\n";
+            echo "🔍 DB_PASSWORD configurado: " . ($_ENV['DB_PASSWORD'] ? 'CONFIGURADO' : 'NO CONFIGURADO') . "\n";
             return true;
         }
     }
