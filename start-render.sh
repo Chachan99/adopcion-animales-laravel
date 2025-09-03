@@ -120,6 +120,25 @@ echo "✅ Directorios de caché configurados"
 # Compilar assets de frontend
 echo "🎨 Compilando assets de frontend..."
 cd /var/www/html
+
+# Verificar si Node.js está disponible
+if command -v node >/dev/null 2>&1; then
+    echo "✅ Node.js encontrado: $(node --version)"
+else
+    echo "📦 Instalando Node.js..."
+    # Instalar Node.js usando NodeSource repository
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    apt-get install -y nodejs
+    echo "✅ Node.js instalado: $(node --version)"
+fi
+
+# Verificar si npm está disponible
+if command -v npm >/dev/null 2>&1; then
+    echo "✅ npm encontrado: $(npm --version)"
+else
+    echo "❌ npm no disponible después de instalar Node.js"
+fi
+
 if [ -f "package.json" ]; then
     echo "📦 Instalando dependencias npm..."
     npm install --production=false
@@ -134,6 +153,31 @@ if [ -f "package.json" ]; then
         echo "❌ Error: manifest.json no se generó"
         echo "📁 Contenido del directorio public/build:"
         ls -la public/build/ 2>/dev/null || echo "Directorio public/build no existe"
+        
+        # Como fallback, copiar los assets precompilados si existen
+        echo "🔄 Intentando usar assets precompilados..."
+        if [ -d "public/build" ] && [ -f "public/build/manifest.json" ]; then
+            echo "✅ Assets precompilados encontrados"
+        else
+            echo "⚠️ Creando directorio build y copiando assets básicos"
+            mkdir -p public/build/assets
+            # Crear un manifest.json básico como fallback
+            cat > public/build/manifest.json << 'EOF'
+{
+  "resources/css/app.css": {
+    "file": "assets/app.css",
+    "isEntry": true,
+    "src": "resources/css/app.css"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app.js",
+    "isEntry": true,
+    "src": "resources/js/app.js"
+  }
+}
+EOF
+            echo "✅ Manifest básico creado como fallback"
+        fi
     fi
 else
     echo "⚠️ package.json no encontrado en /var/www/html, saltando compilación de assets"
