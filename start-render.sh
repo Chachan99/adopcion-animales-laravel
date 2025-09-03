@@ -62,6 +62,27 @@ else
 fi
 
 # Ejecutar configuración de base de datos
+echo "Configurando directorios de caché..."
+# Asegurar que los directorios de caché existan y tengan permisos correctos
+mkdir -p /var/www/html/storage/framework/cache/data
+mkdir -p /var/www/html/storage/framework/sessions
+mkdir -p /var/www/html/storage/framework/views
+mkdir -p /var/www/html/storage/logs
+chmod -R 777 /var/www/html/storage/framework/cache
+chmod -R 777 /var/www/html/storage/framework/sessions
+chmod -R 777 /var/www/html/storage/framework/views
+chmod -R 777 /var/www/html/storage/logs
+echo "✅ Directorios de caché configurados"
+
+# Limpiar y optimizar caché de Laravel
+echo "Optimizando caché de Laravel..."
+cd /var/www/html
+php artisan config:clear || true
+php artisan cache:clear || true
+php artisan view:clear || true
+php artisan route:clear || true
+echo "✅ Caché de Laravel optimizada"
+
 echo "Configurando base de datos..."
 php /var/www/html/render-setup.php
 

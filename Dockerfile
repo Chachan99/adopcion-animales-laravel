@@ -30,10 +30,18 @@ COPY . .
 # Completar instalación de Composer
 RUN composer dump-autoload --no-dev --optimize
 
-# Configurar permisos
-RUN chown -R nginx:nginx /var/www/html \
+# Configurar permisos y crear directorios de caché
+RUN mkdir -p /var/www/html/storage/framework/cache/data \
+    && mkdir -p /var/www/html/storage/framework/sessions \
+    && mkdir -p /var/www/html/storage/framework/views \
+    && mkdir -p /var/www/html/storage/logs \
+    && chown -R nginx:nginx /var/www/html \
     && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+    && chmod -R 755 /var/www/html/bootstrap/cache \
+    && chmod -R 777 /var/www/html/storage/framework/cache \
+    && chmod -R 777 /var/www/html/storage/framework/sessions \
+    && chmod -R 777 /var/www/html/storage/framework/views \
+    && chmod -R 777 /var/www/html/storage/logs
 
 # Crear enlaces simbólicos para storage
 RUN php artisan storage:link || true
