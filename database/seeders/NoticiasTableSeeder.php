@@ -28,6 +28,31 @@ class NoticiasTableSeeder extends Seeder
             ]);
         }
 
+        // Obtener la primera fundación o crear una si no existe
+        $fundacion = \App\Models\PerfilFundacion::first();
+        
+        if (!$fundacion) {
+            // Crear un usuario fundación si no existe
+            $usuarioFundacion = Usuario::where('rol', 'fundacion')->first();
+            if (!$usuarioFundacion) {
+                $usuarioFundacion = Usuario::create([
+                    'nombre' => 'Fundación Ejemplo',
+                    'email' => 'fundacion@example.com',
+                    'password' => bcrypt('password'),
+                    'rol' => 'fundacion'
+                ]);
+            }
+            
+            $fundacion = \App\Models\PerfilFundacion::create([
+                'usuario_id' => $usuarioFundacion->id,
+                'nombre' => 'Fundación Ejemplo',
+                'descripcion' => 'Fundación dedicada al rescate y adopción de animales',
+                'direccion' => 'Calle Ejemplo 123',
+                'telefono' => '123456789',
+                'email' => 'fundacion@example.com'
+            ]);
+        }
+
         // Datos de ejemplo para noticias
         $noticias = [
             [
@@ -101,6 +126,7 @@ class NoticiasTableSeeder extends Seeder
             Noticia::create(array_merge($noticia, [
                 'slug' => $slug,
                 'usuario_id' => $admin->id,
+                'fundacion_id' => $fundacion->id,
                 'created_at' => $noticia['publicado_en'] ?? now(),
                 'updated_at' => $noticia['publicado_en'] ?? now(),
             ]));
@@ -144,6 +170,7 @@ class NoticiasTableSeeder extends Seeder
                 'publicado_en' => now()->subDays(rand(1, 60)),
                 'vistas' => rand(10, 200),
                 'usuario_id' => $admin->id,
+                'fundacion_id' => $fundacion->id,
                 'created_at' => now()->subDays(rand(1, 60)),
                 'updated_at' => now()->subDays(rand(1, 60)),
             ]);
@@ -177,6 +204,7 @@ class NoticiasTableSeeder extends Seeder
                 'publicado_en' => null,
                 'vistas' => 0,
                 'usuario_id' => $admin->id,
+                'fundacion_id' => $fundacion->id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
