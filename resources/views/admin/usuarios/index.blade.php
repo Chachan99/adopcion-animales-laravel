@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gray-50" x-data="{ showModal: false, userId: null }">
     <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <!-- Encabezado mejorado -->
         <div class="mb-8">
@@ -162,19 +162,15 @@
                                         </svg>
                                         <span class="hidden md:inline">Editar</span>
                                     </a>
-                                    <form action="{{ route('admin.usuarios.eliminar', $usuario->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="text-red-600 hover:text-red-900 flex items-center gap-1"
-                                                onclick="return confirm('¿Estás seguro de eliminar este usuario?')"
-                                                title="Eliminar usuario">
-                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                            <span class="hidden md:inline">Eliminar</span>
-                                        </button>
-                                    </form>
+                                    <button type="button" 
+                                            class="text-red-600 hover:text-red-900 flex items-center gap-1"
+                                            @click="userId = {{ $usuario->id }}; showModal = true"
+                                            title="Eliminar usuario">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        <span class="hidden md:inline">Eliminar</span>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -233,7 +229,7 @@
 </div>
 
 <!-- Modal de confirmación con Alpine.js -->
-<div x-data="{ showModal: false, userId: null }" x-cloak>
+<div x-cloak>
     <!-- Modal backdrop -->
     <div x-show="showModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
 
@@ -259,7 +255,7 @@
                     </div>
                 </div>
                 <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                    <form :action="`/admin/usuarios/${userId}/eliminar`" method="POST" class="inline">
+                    <form :action="`{{ url('/admin/usuarios') }}/${userId}`" method="POST" class="inline">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
@@ -275,20 +271,4 @@
     </div>
 </div>
 
-<script>
-    function confirmDelete(userId) {
-        return {
-            showModal: false,
-            userId: userId,
-            openModal(id) {
-                this.userId = id;
-                this.showModal = true;
-            },
-            deleteUser() {
-                // Lógica para eliminar el usuario
-                this.showModal = false;
-            }
-        }
-    }
-</script>
 @endsection
