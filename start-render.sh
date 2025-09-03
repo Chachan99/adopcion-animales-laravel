@@ -50,12 +50,12 @@ echo "Verificando configuración de PHP-FPM..."
 PHP_FPM_CONF_DIR=$(find /etc -name "php-fpm.d" 2>/dev/null | head -1)
 PHP_FPM_WWW_CONF=$(find /etc -name "www.conf" 2>/dev/null | head -1)
 
-# Forzar configuración TCP en puerto 9001 para evitar conflictos
+# Forzar configuración TCP en puerto 9000 (puerto estándar)
 if [ -n "$PHP_FPM_WWW_CONF" ]; then
     echo "✅ Configuración de PHP-FPM encontrada en: $PHP_FPM_WWW_CONF"
-    # Cambiar a puerto 9001 inmediatamente
-    sed -i 's|listen = .*|listen = 127.0.0.1:9001|g' "$PHP_FPM_WWW_CONF"
-    echo "✅ PHP-FPM configurado para usar puerto 9001"
+    # Cambiar a puerto 9000 inmediatamente
+    sed -i 's|listen = .*|listen = 127.0.0.1:9000|g' "$PHP_FPM_WWW_CONF"
+    echo "✅ PHP-FPM configurado para usar puerto 9000"
 else
     echo "❌ Configuración de PHP-FPM no encontrada"
     # Intentar crear configuración básica con puerto TCP
@@ -64,25 +64,25 @@ else
 [www]
 user = nginx
 group = nginx
-listen = 127.0.0.1:9001
+listen = 127.0.0.1:9000
 pm = dynamic
 pm.max_children = 5
 pm.start_servers = 2
 pm.min_spare_servers = 1
 pm.max_spare_servers = 3
 EOF
-        echo "✅ Configuración básica creada con puerto 9001"
+        echo "✅ Configuración básica creada con puerto 9000"
     fi
 fi
 
-# Buscar y actualizar TODAS las configuraciones de PHP-FPM
-find /etc -name "*.conf" -path "*/php*" -exec sed -i 's|listen = 127.0.0.1:9000|listen = 127.0.0.1:9001|g' {} \;
-find /etc -name "*.conf" -path "*/php*" -exec sed -i 's|listen = 9000|listen = 127.0.0.1:9001|g' {} \;
+# Buscar y actualizar TODAS las configuraciones de PHP-FPM para usar puerto 9000
+find /etc -name "*.conf" -path "*/php*" -exec sed -i 's|listen = 127.0.0.1:9001|listen = 127.0.0.1:9000|g' {} \;
+find /etc -name "*.conf" -path "*/php*" -exec sed -i 's|listen = 9001|listen = 127.0.0.1:9000|g' {} \;
 
 # Asegurar que Nginx esté configurado para TCP
 echo "Configurando Nginx para usar TCP..."
-sed -i 's|fastcgi_pass unix:/var/run/php-fpm.sock|fastcgi_pass 127.0.0.1:9001|g' /etc/nginx/nginx.conf
-sed -i 's|fastcgi_pass 127.0.0.1:9000|fastcgi_pass 127.0.0.1:9001|g' /etc/nginx/nginx.conf
+sed -i 's|fastcgi_pass unix:/var/run/php-fpm.sock|fastcgi_pass 127.0.0.1:9000|g' /etc/nginx/nginx.conf
+sed -i 's|fastcgi_pass 127.0.0.1:9001|fastcgi_pass 127.0.0.1:9000|g' /etc/nginx/nginx.conf
 
 # Matar cualquier proceso PHP-FPM existente
 echo "Deteniendo procesos PHP-FPM existentes..."
@@ -90,14 +90,14 @@ pkill php-fpm 2>/dev/null || true
 sleep 2
 
 # Iniciar PHP-FPM en modo TCP
-echo "Iniciando PHP-FPM en puerto 9001..."
+echo "Iniciando PHP-FPM en puerto 9000..."
 php-fpm -D
 
 # Verificar que PHP-FPM esté corriendo
 sleep 3
 if pgrep php-fpm > /dev/null; then
     echo "✅ PHP-FPM iniciado correctamente"
-    netstat -tlnp | grep :9001 || echo "⚠️ Puerto 9001 no visible en netstat"
+    netstat -tlnp | grep :9000 || echo "⚠️ Puerto 9000 no visible en netstat"
 else
     echo "❌ Error: PHP-FPM no se pudo iniciar"
     # Mostrar logs para debug
@@ -179,16 +179,16 @@ echo "✅ Directorios de Nginx configurados"
 echo "🔍 Verificando conectividad con PHP-FPM..."
 # Usar timeout y curl como alternativa a nc si no está disponible
 if command -v nc >/dev/null 2>&1; then
-    if nc -z 127.0.0.1 9001; then
-        echo "✅ PHP-FPM responde en puerto 9001 (nc)"
+    if nc -z 127.0.0.1 9000; then
+        echo "✅ PHP-FPM responde en puerto 9000 (nc)"
     else
-        echo "❌ PHP-FPM no responde en puerto 9001 (nc)"
+        echo "❌ PHP-FPM no responde en puerto 9000 (nc)"
     fi
 elif command -v timeout >/dev/null 2>&1; then
-    if timeout 3 bash -c "</dev/tcp/127.0.0.1/9001"; then
-        echo "✅ PHP-FPM responde en puerto 9001 (timeout)"
+    if timeout 3 bash -c "</dev/tcp/127.0.0.1/9000"; then
+        echo "✅ PHP-FPM responde en puerto 9000 (timeout)"
     else
-        echo "❌ PHP-FPM no responde en puerto 9001 (timeout)"
+        echo "❌ PHP-FPM no responde en puerto 9000 (timeout)"
     fi
 else
     echo "⚠️ No se puede verificar conectividad (nc/timeout no disponibles)"
