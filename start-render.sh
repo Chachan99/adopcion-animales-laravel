@@ -66,10 +66,10 @@ user = nginx
 group = nginx
 listen = 127.0.0.1:9000
 pm = dynamic
-pm.max_children = 5
-pm.start_servers = 2
-pm.min_spare_servers = 1
-pm.max_spare_servers = 3
+pm.max_children = 10
+pm.start_servers = 3
+pm.min_spare_servers = 2
+pm.max_spare_servers = 5
 EOF
         echo "✅ Configuración básica creada con puerto 9000"
     fi
@@ -117,14 +117,26 @@ chmod -R 777 /var/www/html/storage/framework/views
 chmod -R 777 /var/www/html/storage/logs
 echo "✅ Directorios de caché configurados"
 
+# Compilar assets de frontend
+echo "🎨 Compilando assets de frontend..."
+if [ -f "package.json" ]; then
+    npm install --production=false
+    npm run build
+    echo "✅ Assets compilados correctamente"
+else
+    echo "⚠️ package.json no encontrado, saltando compilación de assets"
+fi
+
 # Limpiar y optimizar caché de Laravel
-echo "Optimizando caché de Laravel..."
+echo "🧹 Limpiando caché de Laravel..."
 cd /var/www/html
 php artisan config:clear || true
 php artisan cache:clear || true
 php artisan view:clear || true
 php artisan route:clear || true
-echo "✅ Caché de Laravel optimizada"
+php artisan config:cache || true
+php artisan route:cache || true
+echo "✅ Caché optimizado"
 
 echo "Configurando base de datos..."
 
