@@ -125,66 +125,72 @@ cd /var/www/html
 if command -v node >/dev/null 2>&1; then
     echo "✅ Node.js encontrado: $(node --version)"
 else
-    echo "📦 Instalando Node.js usando método universal..."
+    echo "📦 Intentando instalar Node.js usando múltiples métodos..."
     
-    # Detectar arquitectura
-    ARCH=$(uname -m)
-    case $ARCH in
-        x86_64) NODE_ARCH="x64" ;;
-        aarch64) NODE_ARCH="arm64" ;;
-        *) NODE_ARCH="x64" ;;
-    esac
-    
-    # Descargar e instalar Node.js 18.x
-    NODE_VERSION="18.19.0"
-    NODE_URL="https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz"
-    
-    echo "🔽 Descargando Node.js ${NODE_VERSION} para ${NODE_ARCH}..."
-    curl -fsSL "$NODE_URL" -o node.tar.xz
-    
-    # Extraer e instalar
-    tar -xf node.tar.xz
-    NODE_DIR="node-v${NODE_VERSION}-linux-${NODE_ARCH}"
-    
-    # Verificar que la descarga fue exitosa
-    if [ ! -f node.tar.xz ]; then
-        echo "❌ Error: No se pudo descargar Node.js"
-        echo "🔄 Creando manifest básico como fallback..."
-    elif ! tar -tf node.tar.xz >/dev/null 2>&1; then
-        echo "❌ Error: Archivo descargado está corrupto"
-        echo "🔄 Creando manifest básico como fallback..."
-    else
-        # Extraer e instalar
-        echo "📦 Extrayendo Node.js..."
-        tar -xf node.tar.xz
-        
-        # Verificar que la extracción fue exitosa
-        if [ -d "$NODE_DIR" ] && [ -f "$NODE_DIR/bin/node" ]; then
-            # Copiar binarios a /usr/local/bin con permisos
-            cp "$NODE_DIR/bin/node" /usr/local/bin/
-            cp "$NODE_DIR/bin/npm" /usr/local/bin/
-            cp "$NODE_DIR/bin/npx" /usr/local/bin/
-            
-            # Dar permisos de ejecución
-            chmod +x /usr/local/bin/node
-            chmod +x /usr/local/bin/npm
-            chmod +x /usr/local/bin/npx
-            
-            echo "✅ Binarios copiados y permisos configurados"
-        else
-            echo "❌ Error: Extracción de Node.js falló"
-        fi
-        
-        # Limpiar archivos temporales
-        rm -rf node.tar.xz "$NODE_DIR"
+    # Método 1: Intentar con gestor de paquetes del sistema
+    if command -v apt-get >/dev/null 2>&1; then
+        echo "🔧 Método 1: Usando apt-get..."
+        apt-get update -qq
+        apt-get install -y nodejs npm
+    elif command -v yum >/dev/null 2>&1; then
+        echo "🔧 Método 1: Usando yum..."
+        yum install -y nodejs npm
+    elif command -v apk >/dev/null 2>&1; then
+        echo "🔧 Método 1: Usando apk..."
+        apk add --no-cache nodejs npm
     fi
     
-    # Verificar instalación final
-    if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
-        echo "✅ Node.js instalado correctamente: $(node --version)"
-        echo "✅ npm disponible: $(npm --version)"
+    # Verificar si el método 1 funcionó
+    if command -v node >/dev/null 2>&1; then
+        echo "✅ Node.js instalado via gestor de paquetes: $(node --version)"
     else
-        echo "❌ Error al instalar Node.js - usando fallback"
+        echo "🔧 Método 2: Instalación manual con NVM..."
+        
+        # Instalar NVM
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        
+        # Instalar Node.js con NVM
+        if command -v nvm >/dev/null 2>&1; then
+            nvm install 18
+            nvm use 18
+            nvm alias default 18
+        fi
+        
+        # Verificar instalación con NVM
+        if command -v node >/dev/null 2>&1; then
+            echo "✅ Node.js instalado via NVM: $(node --version)"
+        else
+            echo "🔧 Método 3: Descarga directa como último recurso..."
+            
+            # Detectar arquitectura
+            ARCH=$(uname -m)
+            case $ARCH in
+                x86_64) NODE_ARCH="x64" ;;
+                aarch64) NODE_ARCH="arm64" ;;
+                *) NODE_ARCH="x64" ;;
+            esac
+            
+            # Descargar Node.js
+            NODE_VERSION="18.19.0"
+            NODE_URL="https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz"
+            
+            echo "🔽 Descargando Node.js ${NODE_VERSION}..."
+            if curl -fsSL "$NODE_URL" -o node.tar.xz && tar -xf node.tar.xz; then
+                NODE_DIR="node-v${NODE_VERSION}-linux-${NODE_ARCH}"
+                if [ -d "$NODE_DIR" ]; then
+                    # Crear enlaces simbólicos en lugar de copiar
+                    ln -sf "$(pwd)/$NODE_DIR/bin/node" /usr/local/bin/node
+                    ln -sf "$(pwd)/$NODE_DIR/bin/npm" /usr/local/bin/npm
+                    ln -sf "$(pwd)/$NODE_DIR/bin/npx" /usr/local/bin/npx
+                    
+                    # Agregar al PATH
+                    export PATH="$(pwd)/$NODE_DIR/bin:$PATH"
+                    echo "✅ Node.js configurado con enlaces simbólicos"
+                fi
+            fi
+        fi
     fi
 fi
 
