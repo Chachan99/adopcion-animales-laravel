@@ -2,6 +2,18 @@
 
 echo "=== INICIANDO SERVICIOS EN RENDER ==="
 
+# Verificar driver PostgreSQL
+echo "Verificando driver PostgreSQL..."
+if php -m | grep -q pdo_pgsql; then
+    echo "✅ Driver PostgreSQL disponible"
+else
+    echo "❌ Driver PostgreSQL no encontrado"
+    echo "🔧 Intentando cargar extensión..."
+    # Intentar cargar la extensión si está compilada pero no cargada
+    echo "extension=pdo_pgsql" >> /usr/local/etc/php/conf.d/pgsql.ini 2>/dev/null || true
+    echo "extension=pgsql" >> /usr/local/etc/php/conf.d/pgsql.ini 2>/dev/null || true
+fi
+
 # Verificar si PHP-FPM está configurado
 echo "Verificando configuración de PHP-FPM..."
 
