@@ -38,7 +38,7 @@ return new class extends Migration
         // Añadimos la clave foránea
         Schema::table('animales', function (Blueprint $table) {
             $table->foreign('fundacion_id')
-                  ->references('id')
+                  ->references('usuario_id')
                   ->on('perfil_fundaciones')
                   ->onDelete('cascade');
         });

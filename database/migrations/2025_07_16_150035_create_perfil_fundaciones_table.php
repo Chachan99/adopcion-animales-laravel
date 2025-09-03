@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('imagen')->nullable();
             $table->timestamps();
 
+            $table->unique('usuario_id');
             $table->foreign('usuario_id')->references('id')->on('usuarios')->onDelete('cascade');
         });
     }
