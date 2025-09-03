@@ -14,6 +14,31 @@ $kernel->bootstrap();
 
 echo "=== CONFIGURACIÓN INICIAL PARA RENDER ===\n\n";
 
+// Función para parsear DATABASE_URL y configurar variables individuales
+function parseDatabaseUrl() {
+    $databaseUrl = getenv('DATABASE_URL');
+    if ($databaseUrl) {
+        echo "📋 Parseando DATABASE_URL...\n";
+        $parsed = parse_url($databaseUrl);
+        
+        if ($parsed) {
+            putenv('DB_CONNECTION=pgsql');
+            putenv('DB_HOST=' . ($parsed['host'] ?? ''));
+            putenv('DB_PORT=' . ($parsed['port'] ?? '5432'));
+            putenv('DB_DATABASE=' . ltrim($parsed['path'] ?? '', '/'));
+            putenv('DB_USERNAME=' . ($parsed['user'] ?? ''));
+            putenv('DB_PASSWORD=' . ($parsed['pass'] ?? ''));
+            
+            echo "✅ Variables de base de datos configuradas desde DATABASE_URL\n";
+            return true;
+        }
+    }
+    return false;
+}
+
+// Intentar parsear DATABASE_URL si está disponible
+parseDatabaseUrl();
+
 try {
     // Verificar conexión
     echo "1. Verificando conexión a PostgreSQL...\n";
@@ -36,8 +61,15 @@ try {
     } catch (PDOException $e) {
         echo "❌ ERROR de conexión: " . $e->getMessage() . "\n";
         echo "🔧 Verificaciones necesarias:\n";
-        echo "    1. DATABASE_URL configurada: " . (isset($_ENV['DATABASE_URL']) && !empty($_ENV['DATABASE_URL']) ? "✅" : "❌") . "\n";
-        echo "    2. DB_CONNECTION: " . ($_ENV['DB_CONNECTION'] ?? 'no configurado') . "\n";
+        echo "    1. DATABASE_URL configurada: " . (getenv('DATABASE_URL') ? '✅' : '❌') . "\n";
+        if (getenv('DATABASE_URL')) {
+            echo "    DATABASE_URL: " . substr(getenv('DATABASE_URL'), 0, 50) . "...\n";
+        }
+        echo "    2. DB_CONNECTION: " . (getenv('DB_CONNECTION') ?: 'no configurado') . "\n";
+        echo "    3. DB_HOST: " . (getenv('DB_HOST') ?: 'no configurado') . "\n";
+        echo "    4. DB_DATABASE: " . (getenv('DB_DATABASE') ?: 'no configurado') . "\n";
+        echo "    5. DB_USERNAME: " . (getenv('DB_USERNAME') ? '✅' : '❌') . "\n";
+        echo "    6. DB_PASSWORD: " . (getenv('DB_PASSWORD') ? '✅' : '❌') . "\n";
         throw $e;
     }
     

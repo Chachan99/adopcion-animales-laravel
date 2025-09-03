@@ -52,13 +52,13 @@ else
     # Buscar archivo de configuración de PHP-FPM
     PHP_FPM_CONF=$(find /etc -name "www.conf" 2>/dev/null | head -1)
     if [ -n "$PHP_FPM_CONF" ]; then
-        sed -i 's|listen = /var/run/php-fpm.sock|listen = 127.0.0.1:9000|g' "$PHP_FPM_CONF"
+        sed -i 's|listen = /var/run/php-fpm.sock|listen = 127.0.0.1:9001|g' "$PHP_FPM_CONF"
     fi
     pkill php-fpm 2>/dev/null || true
     php-fpm -D
     
     # Actualizar nginx para usar TCP
-    sed -i 's|fastcgi_pass unix:/var/run/php-fpm.sock|fastcgi_pass 127.0.0.1:9000|g' /etc/nginx/nginx.conf
+    sed -i 's|fastcgi_pass unix:/var/run/php-fpm.sock|fastcgi_pass 127.0.0.1:9001|g' /etc/nginx/nginx.conf
 fi
 
 # Ejecutar configuración de base de datos
