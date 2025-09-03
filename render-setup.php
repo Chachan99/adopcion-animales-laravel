@@ -54,6 +54,27 @@ try {
             echo "📡 Usando DATABASE_URL proporcionada por Render\n";
             echo "🔍 Driver pgsql confirmado disponible\n";
             
+            // Diagnóstico detallado de DATABASE_URL
+            echo "🔍 DATABASE_URL: " . substr($_ENV['DATABASE_URL'], 0, 30) . "...\n";
+            
+            // Parsear DATABASE_URL manualmente para verificar formato
+            $url_parts = parse_url($_ENV['DATABASE_URL']);
+            if (!$url_parts || !isset($url_parts['scheme'])) {
+                throw new Exception('DATABASE_URL tiene formato inválido');
+            }
+            
+            echo "🔍 Esquema detectado: " . $url_parts['scheme'] . "\n";
+            
+            // Crear DSN manualmente para PostgreSQL
+            $host = $url_parts['host'] ?? 'localhost';
+            $port = $url_parts['port'] ?? 5432;
+            $dbname = ltrim($url_parts['path'] ?? '', '/');
+            $user = $url_parts['user'] ?? '';
+            $pass = $url_parts['pass'] ?? '';
+            
+            $dsn = "pgsql:host={$host};port={$port};dbname={$dbname}";
+            echo "🔍 DSN construido: {$dsn}\n";
+            
             // Opciones específicas para PostgreSQL
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -61,7 +82,8 @@ try {
                 PDO::ATTR_EMULATE_PREPARES => false,
             ];
             
-            $pdo = new PDO($_ENV['DATABASE_URL'], null, null, $options);
+            echo "🔄 Intentando conexión con DSN construido...\n";
+            $pdo = new PDO($dsn, $user, $pass, $options);
         } else {
             // Fallback a Laravel DB connection
             $pdo = DB::connection()->getPdo();
