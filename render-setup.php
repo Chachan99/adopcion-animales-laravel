@@ -55,7 +55,7 @@ try {
             echo "🔍 Driver pgsql confirmado disponible\n";
             
             // Diagnóstico detallado de DATABASE_URL
-            echo "🔍 DATABASE_URL: " . substr($_ENV['DATABASE_URL'], 0, 30) . "...\n";
+            echo "🔍 DATABASE_URL completa: " . $_ENV['DATABASE_URL'] . "\n";
             
             // Parsear DATABASE_URL manualmente para verificar formato
             $url_parts = parse_url($_ENV['DATABASE_URL']);
@@ -71,6 +71,13 @@ try {
             $dbname = ltrim($url_parts['path'] ?? '', '/');
             $user = $url_parts['user'] ?? '';
             $pass = $url_parts['pass'] ?? '';
+            
+            // Mostrar valores parseados para diagnóstico
+            echo "🔍 Host parseado: '{$host}'\n";
+            echo "🔍 Puerto parseado: '{$port}'\n";
+            echo "🔍 Base de datos parseada: '{$dbname}'\n";
+            echo "🔍 Usuario parseado: '" . (empty($user) ? 'VACÍO' : 'CONFIGURADO') . "'\n";
+            echo "🔍 Contraseña parseada: '" . (empty($pass) ? 'VACÍA' : 'CONFIGURADA') . "'\n";
             
             $dsn = "pgsql:host={$host};port={$port};dbname={$dbname}";
             echo "🔍 DSN construido: {$dsn}\n";
