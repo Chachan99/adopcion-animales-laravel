@@ -146,19 +146,45 @@ else
     tar -xf node.tar.xz
     NODE_DIR="node-v${NODE_VERSION}-linux-${NODE_ARCH}"
     
-    # Copiar binarios a /usr/local/bin
-    cp "$NODE_DIR/bin/node" /usr/local/bin/
-    cp "$NODE_DIR/bin/npm" /usr/local/bin/
-    cp "$NODE_DIR/bin/npx" /usr/local/bin/
-    
-    # Limpiar archivos temporales
-    rm -rf node.tar.xz "$NODE_DIR"
-    
-    # Verificar instalación
-    if command -v node >/dev/null 2>&1; then
-        echo "✅ Node.js instalado correctamente: $(node --version)"
+    # Verificar que la descarga fue exitosa
+    if [ ! -f node.tar.xz ]; then
+        echo "❌ Error: No se pudo descargar Node.js"
+        echo "🔄 Creando manifest básico como fallback..."
+    elif ! tar -tf node.tar.xz >/dev/null 2>&1; then
+        echo "❌ Error: Archivo descargado está corrupto"
+        echo "🔄 Creando manifest básico como fallback..."
     else
-        echo "❌ Error al instalar Node.js"
+        # Extraer e instalar
+        echo "📦 Extrayendo Node.js..."
+        tar -xf node.tar.xz
+        
+        # Verificar que la extracción fue exitosa
+        if [ -d "$NODE_DIR" ] && [ -f "$NODE_DIR/bin/node" ]; then
+            # Copiar binarios a /usr/local/bin con permisos
+            cp "$NODE_DIR/bin/node" /usr/local/bin/
+            cp "$NODE_DIR/bin/npm" /usr/local/bin/
+            cp "$NODE_DIR/bin/npx" /usr/local/bin/
+            
+            # Dar permisos de ejecución
+            chmod +x /usr/local/bin/node
+            chmod +x /usr/local/bin/npm
+            chmod +x /usr/local/bin/npx
+            
+            echo "✅ Binarios copiados y permisos configurados"
+        else
+            echo "❌ Error: Extracción de Node.js falló"
+        fi
+        
+        # Limpiar archivos temporales
+        rm -rf node.tar.xz "$NODE_DIR"
+    fi
+    
+    # Verificar instalación final
+    if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
+        echo "✅ Node.js instalado correctamente: $(node --version)"
+        echo "✅ npm disponible: $(npm --version)"
+    else
+        echo "❌ Error al instalar Node.js - usando fallback"
     fi
 fi
 
