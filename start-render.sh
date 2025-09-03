@@ -119,12 +119,26 @@ echo "✅ Directorios de caché configurados"
 
 # Compilar assets de frontend
 echo "🎨 Compilando assets de frontend..."
+cd /var/www/html
 if [ -f "package.json" ]; then
+    echo "📦 Instalando dependencias npm..."
     npm install --production=false
+    echo "🔨 Ejecutando build..."
     npm run build
-    echo "✅ Assets compilados correctamente"
+    
+    # Verificar que los assets se compilaron correctamente
+    if [ -f "public/build/manifest.json" ]; then
+        echo "✅ Assets compilados correctamente - manifest.json encontrado"
+        ls -la public/build/
+    else
+        echo "❌ Error: manifest.json no se generó"
+        echo "📁 Contenido del directorio public/build:"
+        ls -la public/build/ 2>/dev/null || echo "Directorio public/build no existe"
+    fi
 else
-    echo "⚠️ package.json no encontrado, saltando compilación de assets"
+    echo "⚠️ package.json no encontrado en /var/www/html, saltando compilación de assets"
+    pwd
+    ls -la
 fi
 
 # Limpiar y optimizar caché de Laravel
