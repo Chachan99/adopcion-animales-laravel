@@ -68,6 +68,19 @@ class PerfilFundacion extends Model
         // Limpiar la ruta de la imagen
         $imagenPath = ltrim($this->imagen, '/');
         
+        // Verificar rutas en public/img PRIMERO (donde están las imágenes reales)
+        $publicPaths = [
+            'img/fundaciones/' . $imagenPath,
+            'fundaciones/' . $imagenPath,
+            $imagenPath
+        ];
+        
+        foreach ($publicPaths as $path) {
+            if (file_exists(public_path($path))) {
+                return asset($path);
+            }
+        }
+        
         // Si la imagen está en el storage público de Laravel
         if (\Illuminate\Support\Facades\Storage::disk('public')->exists($imagenPath)) {
             return asset('storage/' . $imagenPath);
@@ -76,19 +89,6 @@ class PerfilFundacion extends Model
         // Verificar si la imagen está en fundaciones/ dentro del storage
         if (\Illuminate\Support\Facades\Storage::disk('public')->exists('fundaciones/' . $imagenPath)) {
             return asset('storage/fundaciones/' . $imagenPath);
-        }
-        
-        // Verificar rutas legacy en public/img
-        $legacyPaths = [
-            'img/fundaciones/' . $imagenPath,
-            'fundaciones/' . $imagenPath,
-            $imagenPath
-        ];
-        
-        foreach ($legacyPaths as $path) {
-            if (file_exists(public_path($path))) {
-                return asset($path);
-            }
         }
 
         // Si no se encuentra la imagen, devolver imagen por defecto

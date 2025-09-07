@@ -8,6 +8,33 @@ use App\Http\Controllers\TestController;
 use App\Http\Controllers\AnimalController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+// Health check route para monitoreo
+Route::get('/health', function () {
+    try {
+        // Verificar conexión a base de datos
+        DB::connection()->getPdo();
+        
+        return response()->json([
+            'status' => 'ok',
+            'timestamp' => now(),
+            'environment' => app()->environment(),
+            'memory' => [
+                'current' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
+                'peak' => round(memory_get_peak_usage(true) / 1024 / 1024, 2) . ' MB'
+            ],
+            'database' => 'connected',
+            'version' => app()->version()
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'timestamp' => now(),
+            'error' => $e->getMessage()
+        ], 500);
+    }
+})->name('health.check');
 
 Route::get('/', [PublicoController::class, 'index'])->name('home');
 

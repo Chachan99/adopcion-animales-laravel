@@ -12,21 +12,23 @@ class PublicoController extends Controller
 {
     public function index()
     {
-        // Obtener animales disponibles con su fundación relacionada
-        $animales = Animal::with('fundacion')
+        // Obtener animales disponibles con su fundación relacionada (optimizado)
+        $animales = Animal::with(['fundacion:id,usuario_id,nombre'])
+            ->select('id', 'nombre', 'tipo', 'imagen', 'fundacion_id', 'created_at')
             ->where('estado', 'disponible')
             ->orderBy('created_at', 'desc')
-            ->paginate(9);
+            ->limit(9)
+            ->get();
             
-        // Obtener fundaciones con conteo de animales disponibles
-        $fundaciones = PerfilFundacion::with(['usuario', 'animales' => function($query) {
-                $query->where('estado', 'disponible');
-            }])
+        // Obtener fundaciones con conteo optimizado
+        $fundaciones = PerfilFundacion::with(['usuario:id,nombre'])
+            ->select('id', 'usuario_id', 'nombre', 'descripcion', 'imagen', 'created_at')
             ->withCount(['animales' => function($query) {
                 $query->where('estado', 'disponible');
             }])
             ->orderBy('created_at', 'desc')
-            ->paginate(6);
+            ->limit(6)
+            ->get();
             
         return view('publico.index', compact('animales', 'fundaciones'));
     }
@@ -36,7 +38,8 @@ class PublicoController extends Controller
      */
     public function animales()
     {
-        $animales = Animal::with('fundacion')
+        $animales = Animal::with(['fundacion:id,usuario_id,nombre'])
+            ->select('id', 'nombre', 'tipo', 'raza', 'edad', 'sexo', 'imagen', 'fundacion_id', 'created_at')
             ->where('estado', 'disponible')
             ->orderBy('created_at', 'desc')
             ->paginate(12);
@@ -81,7 +84,8 @@ class PublicoController extends Controller
 
     public function buscar(Request $request)
     {
-        $query = Animal::with('fundacion')
+        $query = Animal::with(['fundacion:id,usuario_id,nombre'])
+            ->select('id', 'nombre', 'tipo', 'raza', 'edad', 'sexo', 'imagen', 'fundacion_id', 'created_at')
             ->where('estado', 'disponible');
 
         // Filtros de búsqueda
@@ -128,32 +132,25 @@ class PublicoController extends Controller
 
     public function donaciones()
     {
-        // Log all fundaciones for debugging
-        $allFundaciones = PerfilFundacion::with('usuario')->get();
-        \Log::info('Todas las fundaciones:', $allFundaciones->toArray());
-        
-        // Get fundaciones with either banco_nombre or nombre_titular filled
+        // Obtener fundaciones con información bancaria completa
         $fundaciones = PerfilFundacion::with('usuario')
             ->where(function($query) {
                 $query->where(function($q) {
-                    $q->whereNotNull('banco_nombre')
-                      ->where('banco_nombre', '!=', '');
+                    $q->whereNotNull('banco')
+                      ->where('banco', '!=', '')
+                      ->whereNotNull('numero_cuenta')
+                      ->where('numero_cuenta', '!=', '');
                 })->orWhere(function($q) {
-                    $q->whereNotNull('nombre_titular')
-                      ->where('nombre_titular', '!=', '');
+                    $q->whereNotNull('titular_cuenta')
+                      ->where('titular_cuenta', '!=', '');
                 });
             })
             ->get()
             ->filter(function($fundacion) {
-                // Ensure at least banco_nombre or nombre_titular is not empty
-                return !empty($fundacion->banco_nombre) || !empty($fundacion->nombre_titular);
+                // Verificar que tenga información bancaria mínima
+                return (!empty($fundacion->banco) && !empty($fundacion->numero_cuenta)) || 
+                       !empty($fundacion->titular_cuenta);
             });
-        
-        // Log the filtered results
-        \Log::info('Fundaciones con información bancaria:', $fundaciones->toArray());
-        
-        // For debugging, show all fundaciones
-        $fundaciones = $allFundaciones;
             
         return view('publico.donaciones', compact('fundaciones'));
     }

@@ -144,6 +144,19 @@ class Noticia extends Model
         // Limpiar la ruta de la imagen
         $imagenPath = ltrim($this->imagen, '/');
         
+        // Verificar rutas en public/img PRIMERO (donde están las imágenes reales)
+        $publicPaths = [
+            'img/noticias/' . $imagenPath,
+            'noticias/' . $imagenPath,
+            $imagenPath
+        ];
+        
+        foreach ($publicPaths as $path) {
+            if (file_exists(public_path($path))) {
+                return asset($path);
+            }
+        }
+        
         // Si la imagen está en el storage público de Laravel
         if (\Illuminate\Support\Facades\Storage::disk('public')->exists($imagenPath)) {
             return asset('storage/' . $imagenPath);
@@ -154,19 +167,6 @@ class Noticia extends Model
             return asset('storage/noticias/' . $imagenPath);
         }
         
-        // Verificar rutas legacy en public/img
-        $legacyPaths = [
-            'img/noticias/' . $imagenPath,
-            'noticias/' . $imagenPath,
-            $imagenPath
-        ];
-        
-        foreach ($legacyPaths as $path) {
-            if (file_exists(public_path($path))) {
-                return asset($path);
-            }
-        }
-
         // Si no se encuentra la imagen, devolver imagen por defecto
         return asset('img/defaults/noticia-default.jpg');
     }

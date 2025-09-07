@@ -80,6 +80,19 @@ class MascotaPerdida extends Model
         // Limpiar la ruta de la imagen
         $imagenPath = ltrim($this->imagen, '/');
         
+        // Verificar rutas en public/img PRIMERO (donde están las imágenes reales)
+        $publicPaths = [
+            'img/animales-perdidos/' . $imagenPath,
+            'animales-perdidos/' . $imagenPath,
+            $imagenPath
+        ];
+        
+        foreach ($publicPaths as $path) {
+            if (file_exists(public_path($path))) {
+                return asset($path);
+            }
+        }
+        
         // Si la imagen está en el storage público de Laravel
         if (\Illuminate\Support\Facades\Storage::disk('public')->exists($imagenPath)) {
             return asset('storage/' . $imagenPath);
@@ -88,19 +101,6 @@ class MascotaPerdida extends Model
         // Verificar si la imagen está en animales-perdidos/ dentro del storage
         if (\Illuminate\Support\Facades\Storage::disk('public')->exists('animales-perdidos/' . $imagenPath)) {
             return asset('storage/animales-perdidos/' . $imagenPath);
-        }
-        
-        // Verificar rutas legacy en public/img
-        $legacyPaths = [
-            'img/animales-perdidos/' . $imagenPath,
-            'animales-perdidos/' . $imagenPath,
-            $imagenPath
-        ];
-        
-        foreach ($legacyPaths as $path) {
-            if (file_exists(public_path($path))) {
-                return asset($path);
-            }
         }
 
         // Si no se encuentra la imagen, devolver imagen por defecto
