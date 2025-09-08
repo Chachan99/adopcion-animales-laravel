@@ -9,6 +9,12 @@
             <h1 class="text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">Mascotas Perdidas</h1>
             <p class="text-xl text-gray-600 max-w-2xl mx-auto">Ayudemos a reunir a estas mascotas con sus familias. Cada reporte cuenta.</p>
             <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+                <a href="{{ route('animales-perdidos.create') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
+                    <svg class="-ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Reportar Mascota Perdida
+                </a>
                 <a href="#como-ayudar" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-lg shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
                     <svg class="-ml-1 mr-3 h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -93,6 +99,16 @@
                 </div>
             </div>
         @else
+            <!-- Botón para reportar mascota perdida -->
+            <div class="mb-6 flex justify-center">
+                <a href="{{ route('animales-perdidos.create') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
+                    <svg class="-ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Reportar Mascota Perdida
+                </a>
+            </div>
+
             <div class="mb-4 flex justify-between items-center">
                 <p class="text-sm text-gray-600">
                     Mostrando <span class="font-medium">{{ $animalesPerdidos->firstItem() }}</span> a <span class="font-medium">{{ $animalesPerdidos->lastItem() }}</span> de <span class="font-medium">{{ $animalesPerdidos->total() }}</span> mascotas perdidas
