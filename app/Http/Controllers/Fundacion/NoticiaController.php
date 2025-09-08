@@ -65,7 +65,7 @@ class NoticiaController extends Controller
         $imagenNombre = null;
         if ($request->hasFile('imagen')) {
             $imagen = $request->file('imagen');
-            $imagenNombre = time() . '_' . Str::slug(pathinfo($imagen->getClientOriginalName(), PATHINFO_FILENAME)) . '.webp';
+            $imagenNombre = time() . '_' . Str::slug(pathinfo($imagen->getClientOriginalName(), PATHINFO_FILENAME)) . '.jpg';
             
             // Crear directorio si no existe
             $directorio = public_path('img/noticias');
@@ -86,8 +86,8 @@ class NoticiaController extends Controller
                 // Recortar al tamaño exacto si es necesario
                 $imagenProcesada->cover(1200, 630);
                 
-                // Guardar la imagen procesada en formato WebP
-                $imagenProcesada->toWebp(85)->save($directorio . '/' . $imagenNombre);
+                // Guardar la imagen procesada en formato JPEG (más compatible)
+                $imagenProcesada->toJpeg(85)->save($directorio . '/' . $imagenNombre);
                 
             } catch (\Exception $e) {
                 \Log::error('Error al procesar la imagen: ' . $e->getMessage());
@@ -134,7 +134,7 @@ class NoticiaController extends Controller
         $imagenNombre = null;
         if ($request->hasFile('imagen')) {
             $imagen = $request->file('imagen');
-            $imagenNombre = time() . '_' . Str::slug(pathinfo($imagen->getClientOriginalName(), PATHINFO_FILENAME)) . '.webp';
+            $imagenNombre = time() . '_' . Str::slug(pathinfo($imagen->getClientOriginalName(), PATHINFO_FILENAME)) . '.jpg';
             
             // Crear directorio si no existe
             $directorio = public_path('img/noticias');
@@ -152,8 +152,8 @@ class NoticiaController extends Controller
                 // Redimensionar y recortar al tamaño exacto
                 $imagenProcesada->cover(1200, 630);
                 
-                // Guardar la imagen procesada en formato WebP
-                $imagenProcesada->toWebp(85)->save($directorio . '/' . $imagenNombre);
+                // Guardar la imagen procesada en formato JPEG (más compatible)
+                $imagenProcesada->toJpeg(85)->save($directorio . '/' . $imagenNombre);
                 
             } catch (\Exception $e) {
                 \Log::error('Error al procesar la imagen: ' . $e->getMessage());

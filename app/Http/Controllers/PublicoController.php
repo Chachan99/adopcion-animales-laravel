@@ -135,20 +135,20 @@ class PublicoController extends Controller
         $fundaciones = PerfilFundacion::with('usuario')
             ->where(function($query) {
                 $query->where(function($q) {
-                    $q->whereNotNull('banco')
-                      ->where('banco', '!=', '')
+                    $q->whereNotNull('banco_nombre')
+                      ->where('banco_nombre', '!=', '')
                       ->whereNotNull('numero_cuenta')
                       ->where('numero_cuenta', '!=', '');
                 })->orWhere(function($q) {
-                    $q->whereNotNull('titular_cuenta')
-                      ->where('titular_cuenta', '!=', '');
+                    $q->whereNotNull('nombre_titular')
+                      ->where('nombre_titular', '!=', '');
                 });
             })
             ->get()
             ->filter(function($fundacion) {
                 // Verificar que tenga información bancaria mínima
-                return (!empty($fundacion->banco) && !empty($fundacion->numero_cuenta)) || 
-                       !empty($fundacion->titular_cuenta);
+                return (!empty($fundacion->banco_nombre) && !empty($fundacion->numero_cuenta)) || 
+                       !empty($fundacion->nombre_titular);
             });
             
         return view('publico.donaciones', compact('fundaciones'));

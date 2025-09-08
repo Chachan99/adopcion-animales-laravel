@@ -74,7 +74,7 @@ class NoticiaController extends Controller
         // Procesar la imagen si se subió
         if ($request->hasFile('imagen')) {
             $imagen = $request->file('imagen');
-            $nombreImagen = time() . '_' . Str::slug(pathinfo($imagen->getClientOriginalName(), PATHINFO_FILENAME)) . '.webp';
+            $nombreImagen = time() . '_' . Str::slug(pathinfo($imagen->getClientOriginalName(), PATHINFO_FILENAME)) . '.jpg';
             
             // Crear directorio si no existe
             if (!Storage::exists('public/noticias')) {
@@ -85,7 +85,7 @@ class NoticiaController extends Controller
             $imagenProcesada = Image::read($imagen)
                 ->cover(1200, 630); // Tamaño estándar para redes sociales
                 
-            Storage::put('public/noticias/' . $nombreImagen, $imagenProcesada->toWebp(80));
+            Storage::put('public/noticias/' . $nombreImagen, $imagenProcesada->toJpeg(80));
             $validated['imagen'] = $nombreImagen;
         }
         
@@ -212,13 +212,13 @@ class NoticiaController extends Controller
             }
             
             $imagen = $request->file('imagen');
-            $nombreImagen = time() . '_' . Str::slug(pathinfo($imagen->getClientOriginalName(), PATHINFO_FILENAME)) . '.webp';
+            $nombreImagen = time() . '_' . Str::slug(pathinfo($imagen->getClientOriginalName(), PATHINFO_FILENAME)) . '.jpg';
             
             // Optimizar y convertir a WebP
             $imagenProcesada = Image::read($imagen)
                 ->cover(1200, 630);
                 
-            Storage::put('public/noticias/' . $nombreImagen, $imagenProcesada->toWebp(80));
+            Storage::put('public/noticias/' . $nombreImagen, $imagenProcesada->toJpeg(80));
             $validated['imagen'] = $nombreImagen;
         } elseif ($request->has('eliminar_imagen') && $request->boolean('eliminar_imagen') && $noticia->imagen) {
             // Eliminar la imagen si se marcó la opción de eliminar
