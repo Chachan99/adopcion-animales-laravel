@@ -10,22 +10,20 @@ class AdminSeeder extends Seeder
 {
     public function run()
     {
-        // Solo crear datos si no existen usuarios (seguridad para producción)
-        if (Usuario::count() === 0) {
-            // Crear solo un usuario administrador básico
-            DB::table('usuarios')->insert([
+        // Crear o actualizar usuario administrador
+        Usuario::updateOrCreate(
+            ['email' => 'admin@test.com'],
+            [
                 'nombre' => 'Administrador',
-                'email' => 'admin@admin.com',
+                'email' => 'admin@test.com',
                 'password' => Hash::make('admin123'),
                 'rol' => 'admin',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);
+            ]
+        );
 
-            echo "✅ Usuario administrador creado\n";
-        } else {
-            echo "⚠️ Ya existen usuarios, omitiendo creación de administrador\n";
-        }
+        echo "✅ Usuario administrador creado/actualizado (admin@test.com)\n";
 
         // Solo crear admin si no existe
         if (DB::table('admins')->count() === 0) {
