@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Agregar middleware de monitoreo de memoria solo en producción
-        if (app()->environment('production')) {
+        if (env('APP_ENV') === 'production') {
             $middleware->web(append: [
                 \App\Http\Middleware\MemoryMonitoringMiddleware::class,
             ]);
