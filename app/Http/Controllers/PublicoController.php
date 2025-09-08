@@ -17,8 +17,7 @@ class PublicoController extends Controller
             ->select('id', 'nombre', 'tipo', 'imagen', 'fundacion_id', 'created_at')
             ->where('estado', 'disponible')
             ->orderBy('created_at', 'desc')
-            ->limit(9)
-            ->get();
+            ->paginate(9);
             
         // Obtener fundaciones con conteo optimizado
         $fundaciones = PerfilFundacion::with(['usuario:id,nombre'])
