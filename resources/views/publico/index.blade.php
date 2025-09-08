@@ -144,7 +144,7 @@
                 alt="Foto de {{ $animal->nombre }}, un {{ $animal->tipo }} adorable listo para adopción" 
                 class="object-cover w-full h-full transition-transform duration-300 hover:scale-105" 
                 src="{{ $animal->imagen_url }}"
-                onerror="this.onerror=null; this.src='{{ asset('img/animal-default.jpg') }}'"
+                onerror="this.onerror=null; this.src='{{ asset('img/defaults/animal-default.jpg') }}'"
                 loading="lazy"
               />
             </div>

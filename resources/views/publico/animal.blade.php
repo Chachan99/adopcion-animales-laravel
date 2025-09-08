@@ -432,7 +432,7 @@
                     @foreach($relatedAnimals as $relatedAnimal)
                     <div class="group bg-white rounded-2xl shadow-lg overflow-hidden border border-white/20 hover:shadow-xl hover:border-cyan-300 transition-all duration-300 transform hover:-translate-y-1 min-w-[280px]">
                         <div class="relative h-48 overflow-hidden">
-                            <img src="{{ $relatedAnimal->imagen ? asset('storage/' . $relatedAnimal->imagen) : asset('images/animal-default.jpg') }}" 
+                            <img src="{{ $relatedAnimal->imagen ? asset('storage/' . $relatedAnimal->imagen) : asset('img/defaults/animal-default.jpg') }}" 
                                  alt="{{ $relatedAnimal->nombre }}" 
                                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                             <div class="absolute top-4 left-4">

@@ -74,7 +74,7 @@
                             <img src="{{ $animal->imagen_url }}" 
                                  alt="{{ $animal->nombre }}"
                                  class="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
-                                 onerror="this.onerror=null; this.src='{{ asset('img/animal-default.jpg') }}'"
+                                 onerror="this.onerror=null; this.src='{{ asset('img/defaults/animal-default.jpg') }}'"
                                  loading="lazy" />
                             <div class="absolute top-2 right-2">
                                 <span class="{{ 

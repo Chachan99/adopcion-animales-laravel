@@ -17,7 +17,7 @@
         <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 border-2 border-cyan-200 transition-all hover:shadow-xl">
             <div class="flex flex-col sm:flex-row items-center gap-4">
                 <div class="relative">
-                    <img src="{{ $animal->imagen ? asset('storage/' . $animal->imagen) : asset('images/animal-default.jpg') }}" 
+                    <img src="{{ $animal->imagen ? asset('storage/' . $animal->imagen) : asset('img/defaults/animal-default.jpg') }}" 
                          alt="{{ $animal->nombre }}" 
                          class="w-24 h-24 sm:w-32 sm:h-32 rounded-xl object-cover border-2 border-cyan-200 shadow-sm">
                     <span class="absolute -bottom-2 -right-2 bg-cyan-100 text-cyan-800 text-xs font-bold px-2 py-1 rounded-full border border-cyan-300">
