@@ -13,7 +13,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse($animales as $animal)
                 <div class="bg-white rounded-lg shadow-lg p-6">
-                    <img src="{{ asset('test/' . $animal->imagen) }}" 
+                    <img src="{{ $animal->imagen_url }}" 
                          alt="{{ $animal->nombre }}"
                          class="w-full h-48 object-cover rounded-lg mb-4">
                     <h3 class="text-xl font-semibold mb-2">{{ $animal->nombre }}</h3>
@@ -48,4 +48,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection

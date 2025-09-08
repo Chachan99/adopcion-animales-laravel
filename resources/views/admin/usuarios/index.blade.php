@@ -138,8 +138,8 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10">
-                                        @if($usuario->foto_perfil)
-                                            <img class="h-10 w-10 rounded-full object-cover" src="{{ asset('fundaciones/' . ltrim($usuario->foto_perfil, '/')) }}" alt="{{ $usuario->nombre }}">
+                                        @if($usuario->imagen)
+                                            <img class="h-10 w-10 rounded-full object-cover" src="{{ $usuario->imagen_url }}" alt="{{ $usuario->nombre }}">
                                         @else
                                             <span class="h-10 w-10 flex items-center justify-center text-2xl bg-gray-100 rounded-full">🐾</span>
                                         @endif

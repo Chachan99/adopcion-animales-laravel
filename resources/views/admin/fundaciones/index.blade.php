@@ -7,7 +7,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @forelse($fundaciones as $fundacion)
                 <div class="bg-white rounded-xl shadow-md p-6 flex flex-col items-center border-t-4 border-green-500">
-                    <img src="{{ $fundacion->imagen ? asset('fundaciones/' . $fundacion->imagen) : asset('images/default-fundacion.jpg') }}" alt="{{ $fundacion->nombre }}" class="w-32 h-32 object-cover rounded-full mb-4">
+                    <img src="{{ $fundacion->imagen_url }}" alt="{{ $fundacion->nombre }}" class="w-32 h-32 object-cover rounded-full mb-4">
                     <h2 class="text-xl font-semibold mb-2">{{ $fundacion->nombre }}</h2>
                     <p class="text-gray-600 mb-1">Ubicación: {{ $fundacion->direccion ?? 'No especificada' }}</p>
                     <p class="text-gray-600 mb-1">Animales en adopción: {{ $fundacion->animales_count }}</p>

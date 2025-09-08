@@ -24,7 +24,7 @@
                 @method('PUT')
                 <div class="flex flex-col items-center mb-4">
                     @if($user->imagen)
-                        <img src="{{ asset('test/' . $user->imagen) }}" alt="Foto de perfil" class="w-24 h-24 rounded-full object-cover border-4 border-cyan-300 mb-2">
+                        <img src="{{ $user->imagen_url }}" alt="Foto de perfil" class="w-24 h-24 rounded-full object-cover border-4 border-cyan-300 mb-2">
                     @else
                         <img src="https://ui-avatars.com/api/?name={{ urlencode($user->nombre) }}&background=00bcd4&color=fff" alt="Avatar" class="w-24 h-24 rounded-full object-cover border-4 border-cyan-300 mb-2">
                     @endif
@@ -63,4 +63,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection

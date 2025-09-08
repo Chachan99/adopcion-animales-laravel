@@ -25,6 +25,8 @@ class Usuario extends Authenticatable
         'remember_token',
     ];
 
+    protected $appends = ['imagen_url'];
+
     public function perfilFundacion()
     {
         return $this->hasOne(PerfilFundacion::class, 'usuario_id');
@@ -58,5 +60,16 @@ class Usuario extends Authenticatable
     public function noticias()
     {
         return $this->hasMany(Noticia::class, 'usuario_id');
+    }
+
+    /**
+     * Obtener la URL completa de la imagen del usuario.
+     */
+    public function getImagenUrlAttribute()
+    {
+        if ($this->imagen) {
+            return asset('storage/usuarios/' . $this->imagen);
+        }
+        return null;
     }
 }

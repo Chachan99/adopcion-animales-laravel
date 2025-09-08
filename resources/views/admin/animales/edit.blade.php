@@ -69,7 +69,7 @@
                             <label class="block text-sm font-medium text-gray-700">Imagen (opcional)</label>
                             <input type="file" name="imagen" accept="image/*" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             @if($animal->imagen)
-                                <img src="{{ asset('test/' . $animal->imagen) }}" alt="Imagen actual" class="w-32 h-32 object-cover rounded mt-2">
+                                <img src="{{ $animal->imagen_url }}" alt="Imagen actual" class="w-32 h-32 object-cover rounded mt-2">
                             @endif
                             @error('imagen')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -84,4 +84,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection

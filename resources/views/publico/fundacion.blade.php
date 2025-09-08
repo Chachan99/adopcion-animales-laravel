@@ -12,7 +12,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Información de la fundación -->
                 <div>
-                    <img src="{{ $fundacion->imagen ? asset('fundaciones/' . $fundacion->imagen) : asset('images/default-fundacion.jpg') }}"
+                    <img src="{{ $fundacion->imagen_url ?: asset('images/default-fundacion.jpg') }}"
                          alt="{{ $fundacion->nombre }}"
                          class="w-full h-64 object-cover rounded-lg mb-4">
                     <h1 class="text-3xl font-bold mb-4">{{ $fundacion->nombre }}</h1>
@@ -76,7 +76,7 @@
                         @foreach($animales as $animal)
                         <div class="bg-white rounded-lg shadow p-4 flex flex-col items-center">
                             <div class="w-24 h-24 mb-2 rounded-full overflow-hidden border-4 border-cyan-300 bg-cyan-50 flex items-center justify-center">
-                                <img src="{{ asset('test/' . $animal->imagen) }}" alt="{{ $animal->nombre }}" class="object-cover w-full h-full">
+                                <img src="{{ $animal->imagen_url }}" alt="{{ $animal->nombre }}" class="object-cover w-full h-full">
                             </div>
                             <h3 class="text-lg font-semibold mb-2 text-center">{{ $animal->nombre }}</h3>
                             <p class="text-gray-600 mb-2 text-center">{{ $animal->tipo }}</p>

@@ -16,7 +16,7 @@
                     <div class="flex items-center gap-4 mb-4 md:mb-0">
                         <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-cyan-300 bg-white flex items-center justify-center">
                             @if($solicitud->usuario && $solicitud->usuario->imagen)
-                                <img src="{{ asset('test/' . $solicitud->usuario->imagen) }}" alt="Foto de perfil" class="object-cover w-full h-full">
+                                <img src="{{ $solicitud->usuario->imagen_url }}" alt="Foto de perfil" class="object-cover w-full h-full">
                             @else
                                 <span class="text-2xl">🐾</span>
                             @endif
