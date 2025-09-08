@@ -114,4 +114,29 @@ class AnimalPerdidoController extends Controller
 
         return back()->with('success', '¡La mascota ha sido marcada como encontrada!');
     }
+
+    /**
+     * Remove the specified lost pet from storage.
+     */
+    public function destroy($id)
+    {
+        $mascota = MascotaPerdida::findOrFail($id);
+
+        // Verificar permisos (solo el dueño, la fundación o un administrador puede eliminar)
+        $user = auth()->user();
+        if ($user->rol !== 'admin' && 
+            $user->id !== $mascota->usuario_id && 
+            $user->id !== $mascota->fundacion_id) {
+            abort(403, 'No tienes permiso para realizar esta acción.');
+        }
+
+        // Eliminar la imagen si existe
+        if ($mascota->imagen && file_exists(public_path('img/mascotas-perdidas/' . $mascota->imagen))) {
+            unlink(public_path('img/mascotas-perdidas/' . $mascota->imagen));
+        }
+
+        $mascota->delete();
+
+        return back()->with('success', 'Mascota perdida eliminada exitosamente.');
+    }
 }

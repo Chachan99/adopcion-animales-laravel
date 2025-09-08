@@ -79,15 +79,26 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('animales-perdidos.show', $mascota->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Ver</a>
-                            @if($mascota->estado === 'perdido')
-                                <form action="{{ route('animales-perdidos.marcar-encontrado', $mascota->id) }}" method="POST" class="inline-block">
+                            <div class="flex items-center justify-end space-x-2">
+                                <a href="{{ route('animales-perdidos.show', $mascota->id) }}" class="text-indigo-600 hover:text-indigo-900" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                @if($mascota->estado === 'perdido')
+                                    <form action="{{ route('animales-perdidos.marcar-encontrado', $mascota->id) }}" method="POST" class="inline-block">
+                                        @csrf
+                                        <button type="submit" class="text-green-600 hover:text-green-900" onclick="return confirm('¿Marcar esta mascota como encontrada?')" title="Marcar como encontrada">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                @endif
+                                <form action="{{ route('animales-perdidos.destroy', $mascota->id) }}" method="POST" class="inline-block">
                                     @csrf
-                                    <button type="submit" class="text-green-600 hover:text-green-900" onclick="return confirm('¿Marcar esta mascota como encontrada?')">
-                                        Marcar como encontrada
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('¿Estás seguro de eliminar esta publicación? Esta acción no se puede deshacer.')" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
-                            @endif
+                            </div>
                             @if($mascota->recompensa)
                                 <div class="mt-1 text-xs text-yellow-600">Recompensa: {{ $mascota->recompensa }}</div>
                             @endif

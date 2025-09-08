@@ -51,6 +51,8 @@ Route::post('/animales-perdidos', [App\Http\Controllers\AnimalPerdidoController:
 Route::get('/animales-perdidos/{id}', [App\Http\Controllers\AnimalPerdidoController::class, 'show'])->name('animales-perdidos.show');
 Route::post('/animales-perdidos/{id}/encontrado', [App\Http\Controllers\AnimalPerdidoController::class, 'marcarComoEncontrado'])
     ->name('animales-perdidos.marcar-encontrado');
+Route::delete('/animales-perdidos/{id}', [App\Http\Controllers\AnimalPerdidoController::class, 'destroy'])
+    ->name('animales-perdidos.destroy')->middleware('auth');
 Route::get('/animal/{id}', [PublicoController::class, 'animal'])->name('publico.animal');
 Route::get('/fundacion/{id}', [PublicoController::class, 'fundacion'])->name('publico.fundacion');
 Route::get('/fundaciones', [PublicoController::class, 'fundaciones'])->name('publico.fundaciones');
