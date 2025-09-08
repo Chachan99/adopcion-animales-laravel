@@ -59,7 +59,7 @@
                                     <div class="flex items-center space-x-4">
                                         @if($fundacion->imagen)
                                             <div class="flex-shrink-0 h-16 w-16 rounded-full overflow-hidden bg-gray-200">
-                                                <img class="h-full w-full object-cover" src="{{ $fundacion->imagen ? asset($fundacion->imagen) : asset('images/default-fundacion.jpg') }}" alt="Logo actual">
+                                                <img class="h-full w-full object-cover" src="{{ $fundacion->imagen ? asset($fundacion->imagen) : asset('img/defaults/fundacion-default.jpg') }}" alt="Logo actual">
                                             </div>
                                         @endif
                                         <div class="flex-1">

@@ -15,7 +15,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Imagen de la fundación -->
                 <div>
-                    <img src="{{ $fundacion->imagen ? asset($fundacion->imagen) : asset('images/default-fundacion.jpg') }}"
+                    <img src="{{ $fundacion->imagen ? asset($fundacion->imagen) : asset('img/defaults/fundacion-default.jpg') }}"
                          alt="{{ $fundacion->nombre }}"
                          class="w-full h-64 object-cover rounded-lg mb-4">
                 </div>

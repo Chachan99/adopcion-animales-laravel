@@ -12,7 +12,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Información de la fundación -->
                 <div>
-                    <img src="{{ $fundacion->imagen_url ?: asset('images/default-fundacion.jpg') }}"
+                    <img src="{{ $fundacion->imagen_url ?: asset('img/defaults/fundacion-default.jpg') }}"
                          alt="{{ $fundacion->nombre }}"
                          class="w-full h-64 object-cover rounded-lg mb-4">
                     <h1 class="text-3xl font-bold mb-4">{{ $fundacion->nombre }}</h1>

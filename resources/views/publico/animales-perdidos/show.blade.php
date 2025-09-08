@@ -44,10 +44,10 @@
                     <div class="lg:col-span-1 space-y-6">
                         <!-- Imagen principal -->
                         <div class="relative rounded-xl overflow-hidden shadow-md">
-                            <img src="{{ $mascota->imagen_url ?? asset('img/default-pet-large.jpg') }}" 
+                            <img src="{{ $mascota->imagen_url ?? asset('img/defaults/default-pet.jpg') }}" 
                                  alt="{{ $mascota->nombre }}"
                                  class="w-full h-auto object-cover transition-transform duration-300 hover:scale-105"
-                                 onerror="this.onerror=null; this.src='{{ asset('img/default-pet-large.jpg') }}'"
+                                 onerror="this.onerror=null; this.src='{{ asset('img/defaults/default-pet.jpg') }}'"
                                  loading="lazy"
                             >
                             @if($mascota->recompensa)

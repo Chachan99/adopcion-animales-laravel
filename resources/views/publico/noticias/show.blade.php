@@ -28,7 +28,7 @@
                      alt="{{ $noticia->titulo }}" 
                      class="w-full h-auto max-h-[32rem] object-cover"
                      loading="lazy"
-                     onerror="this.onerror=null;this.src='{{ asset('img/placeholder-news.jpg') }}'">
+                     onerror="this.onerror=null;this.src='{{ asset('img/defaults/noticia-default.jpg') }}'">
             @else
                 <div class="w-full h-64 bg-gradient-to-r from-indigo-50 to-purple-50 flex items-center justify-center">
                     <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
