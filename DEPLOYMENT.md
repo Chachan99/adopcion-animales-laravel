@@ -107,8 +107,11 @@ Una vez desplegada la aplicación:
 4. Ejecutar:
 
 ```bash
+# Solo migrar (seguro para producción)
 php artisan migrate --force
-php artisan db:seed --class=AdminSeeder --force
+
+# El AdminSeeder es condicional y solo crea datos si no existen usuarios
+# NO usar db:seed automático en producción
 php artisan storage:link
 ```
 

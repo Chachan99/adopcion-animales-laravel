@@ -81,23 +81,23 @@ try {
     // 5. Ejecutar migraciones
     echo "\n5. 🚀 Ejecutando migraciones...\n";
     
-    // Opción A: Migrate fresh (recomendado para primera vez)
-    if (count($executedMigrations) === 0) {
-        echo "   🔄 Ejecutando migrate:fresh (primera vez)...\n";
-        Artisan::call('migrate:fresh', ['--force' => true]);
-        echo "   ✅ Migrate fresh completado\n";
-    } else {
-        // Opción B: Migrate normal (para actualizaciones)
-        echo "   🔄 Ejecutando migrate...\n";
-        Artisan::call('migrate', ['--force' => true]);
-        echo "   ✅ Migrate completado\n";
-    }
+    // Solo usar migrate --force (seguro para producción)
+    echo "   🔄 Ejecutando migrate --force...\n";
+    Artisan::call('migrate', ['--force' => true]);
+    echo "   ✅ Migrate completado\n";
     
     // 6. Ejecutar seeders
-    echo "\n6. 🌱 Ejecutando seeders...\n";
+    echo "\n6. 🌱 Verificando necesidad de seeders...\n";
     try {
-        Artisan::call('db:seed', ['--force' => true]);
-        echo "   ✅ Seeders completados\n";
+        // Verificar si ya existen usuarios antes de ejecutar seeders
+        $userCount = DB::table('usuarios')->count();
+        if ($userCount === 0) {
+            echo "   No hay usuarios, ejecutando seeders...\n";
+            Artisan::call('db:seed', ['--force' => true]);
+            echo "   ✅ Seeders completados\n";
+        } else {
+            echo "   Ya existen usuarios ({$userCount}), omitiendo seeders automáticos\n";
+        }
     } catch (Exception $e) {
         echo "   ⚠️ Warning en seeders: " . $e->getMessage() . "\n";
         echo "   💡 Esto es normal si los seeders ya se ejecutaron\n";

@@ -140,15 +140,22 @@ try {
         throw $e;
     }
     
-    // Ejecutar migraciones (fresh para limpiar)
+    // Ejecutar migraciones (solo migrate para producción)
     echo "2. Ejecutando migraciones...\n";
-    Artisan::call('migrate:fresh', ['--force' => true]);
+    Artisan::call('migrate', ['--force' => true]);
     echo "   ✅ Migraciones completadas\n\n";
     
-    // Ejecutar seeders
-    echo "3. Ejecutando seeders...\n";
-    Artisan::call('db:seed', ['--force' => true]);
-    echo "   ✅ Seeders completados\n\n";
+    // Ejecutar seeders solo si no hay usuarios (condicional para producción)
+    echo "3. Verificando necesidad de seeders...\n";
+    $userCount = \App\Models\Usuario::count();
+    if ($userCount === 0) {
+        echo "   No hay usuarios, ejecutando AdminSeeder...\n";
+        Artisan::call('db:seed', ['--class' => 'AdminSeeder', '--force' => true]);
+        echo "   ✅ AdminSeeder completado\n";
+    } else {
+        echo "   Ya existen usuarios ($userCount), omitiendo seeders\n";
+    }
+    echo "\n";
     
     // Limpiar y optimizar cache
     echo "4. Optimizando aplicación...\n";

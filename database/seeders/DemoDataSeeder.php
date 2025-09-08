@@ -6,11 +6,26 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\Usuario;
 
 class DemoDataSeeder extends Seeder
 {
     public function run()
     {
+        // ADVERTENCIA: Este seeder es solo para datos de prueba/desarrollo
+        // NO debe ejecutarse automáticamente en producción
+        if (app()->environment('production')) {
+            echo "⚠️ DemoDataSeeder omitido en producción por seguridad\n";
+            return;
+        }
+
+        // Verificar si ya existen datos de prueba
+        if (Usuario::where('email', 'fundacion@patitasfelices.com')->exists()) {
+            echo "⚠️ Los datos de prueba ya existen, omitiendo DemoDataSeeder\n";
+            return;
+        }
+
+        echo "🔧 Ejecutando DemoDataSeeder (solo desarrollo/testing)...\n";
         // Crear usuarios fundación de prueba
         $fundacionUserId = DB::table('usuarios')->insertGetId([
             'nombre' => 'Fundación Patitas Felices',

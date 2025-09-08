@@ -12,9 +12,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Siempre ejecutar AdminSeeder (es condicional internamente)
         $this->call([
             AdminSeeder::class,
-            DemoDataSeeder::class,
         ]);
+
+        // Solo ejecutar DemoDataSeeder en desarrollo/testing
+        if (!app()->environment('production')) {
+            $this->call([
+                DemoDataSeeder::class,
+            ]);
+        } else {
+            echo "⚠️ DemoDataSeeder omitido en producción\n";
+        }
     }
 }

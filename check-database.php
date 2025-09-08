@@ -42,7 +42,13 @@ try {
         echo "   " . Artisan::output();
         
         echo "4. Ejecutando seeders...\n";
-        Artisan::call('db:seed', ['--force' => true]);
+        // Ejecutar seeders solo si no hay usuarios (condicional para producción)
+        if (\App\Models\Usuario::count() === 0) {
+            echo "No hay usuarios, ejecutando AdminSeeder...\n";
+            Artisan::call('db:seed', ['--class' => 'AdminSeeder', '--force' => true]);
+        } else {
+            echo "Ya existen usuarios, omitiendo seeders automáticos\n";
+        }
         echo "   " . Artisan::output();
         
     } else {
@@ -77,7 +83,13 @@ try {
     
     if ($userCount == 0 || $animalCount == 0) {
         echo "\n   ⚠️ Pocos datos de prueba. Ejecutando seeders...\n";
-        Artisan::call('db:seed', ['--force' => true]);
+        // Ejecutar seeders solo si no hay usuarios (condicional para producción)
+        if (\App\Models\Usuario::count() === 0) {
+            echo "No hay usuarios, ejecutando AdminSeeder...\n";
+            Artisan::call('db:seed', ['--class' => 'AdminSeeder', '--force' => true]);
+        } else {
+            echo "Ya existen usuarios, omitiendo seeders automáticos\n";
+        }
         echo "   " . Artisan::output();
     }
     
