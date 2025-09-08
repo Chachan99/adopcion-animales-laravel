@@ -174,8 +174,55 @@ class AdminController extends Controller
     public function eliminarUsuario($id)
     {
         $usuario = Usuario::findOrFail($id);
+        
+        // Verificar que no se elimine a sí mismo
+        if ($usuario->id === Auth::id()) {
+            return redirect()->route('admin.usuarios')->with('error', 'No puedes eliminarte a ti mismo');
+        }
+        
+        // Verificar que no sea el último administrador
+        if ($usuario->rol === 'admin') {
+            $totalAdmins = Usuario::where('rol', 'admin')->count();
+            if ($totalAdmins <= 1) {
+                return redirect()->route('admin.usuarios')->with('error', 'No se puede eliminar el último administrador del sistema');
+            }
+        }
+        
+        // Verificar si el usuario tiene datos relacionados
+        $tieneRelaciones = false;
+        $mensajeRelaciones = [];
+        
+        // Verificar si es una fundación con animales
+        if ($usuario->rol === 'fundacion' && $usuario->perfilFundacion) {
+            $animalesCount = Animal::where('fundacion_id', $usuario->perfilFundacion->id)->count();
+            if ($animalesCount > 0) {
+                $tieneRelaciones = true;
+                $mensajeRelaciones[] = "$animalesCount animales registrados";
+            }
+            
+            $donacionesCount = Donacion::where('fundacion_id', $usuario->perfilFundacion->id)->count();
+            if ($donacionesCount > 0) {
+                $tieneRelaciones = true;
+                $mensajeRelaciones[] = "$donacionesCount donaciones recibidas";
+            }
+        }
+        
+        // Verificar solicitudes de adopción
+        $solicitudesCount = SolicitudAdopcion::where('usuario_id', $usuario->id)->count();
+        if ($solicitudesCount > 0) {
+            $tieneRelaciones = true;
+            $mensajeRelaciones[] = "$solicitudesCount solicitudes de adopción";
+        }
+        
+        if ($tieneRelaciones) {
+            $mensaje = 'No se puede eliminar este usuario porque tiene: ' . implode(', ', $mensajeRelaciones);
+            return redirect()->route('admin.usuarios')->with('error', $mensaje);
+        }
+        
+        $nombreUsuario = $usuario->nombre;
         $usuario->delete();
-        return redirect()->route('admin.usuarios')->with('success', 'Usuario eliminado exitosamente');
+        
+        return redirect()->route('admin.usuarios')->with('success', "Usuario '$nombreUsuario' eliminado exitosamente");
     }
 
     public function actualizarRol(Request $request, $id)
