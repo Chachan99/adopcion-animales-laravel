@@ -319,9 +319,42 @@ class AdminController extends Controller
 
     public function eliminarAnimal($id)
     {
-        $animal = \App\Models\Animal::findOrFail($id);
-        $animal->delete();
-        return redirect()->route('admin.animales')->with('success', 'Animal eliminado exitosamente');
+        try {
+            return \Illuminate\Support\Facades\DB::transaction(function () use ($id) {
+                $animal = \App\Models\Animal::with(['solicitudesAdopcion', 'donaciones'])->findOrFail($id);
+
+                // Eliminar documentos de solicitudes
+                $animal->solicitudesAdopcion->each(function ($solicitud) {
+                    if ($solicitud->documentos) {
+                        $documentos = json_decode($solicitud->documentos, true);
+                        if (is_array($documentos)) {
+                            collect($documentos)->each(function ($doc) {
+                                if (isset($doc['ruta'])) {
+                                    \Illuminate\Support\Facades\Storage::disk('public')->delete($doc['ruta']);
+                                }
+                            });
+                        }
+                    }
+                });
+
+                // Eliminar relaciones
+                $animal->solicitudesAdopcion()->delete();
+                $animal->donaciones()->delete();
+
+                // Eliminar imagen
+                if ($animal->imagen) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($animal->imagen);
+                }
+
+                $animal->delete();
+
+                return redirect()->route('admin.animales')->with('success', 'Animal eliminado exitosamente');
+            });
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error al eliminar animal: ' . $e->getMessage());
+            return back()->with('error', 'Error al eliminar el animal: ' . $e->getMessage());
+        }
     }
 
     public function solicitudes()
