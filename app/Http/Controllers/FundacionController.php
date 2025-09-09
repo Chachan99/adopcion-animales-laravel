@@ -297,7 +297,10 @@ class FundacionController extends Controller
      */
     public function donaciones()
     {
-        $donaciones = Donacion::where('fundacion_id', Auth::id())
+        // Obtener la fundación del usuario autenticado
+        $fundacion = PerfilFundacion::where('usuario_id', Auth::id())->firstOrFail();
+        
+        $donaciones = Donacion::where('fundacion_id', $fundacion->id)
             ->with('usuario')
             ->latest()
             ->paginate(10);
@@ -310,7 +313,10 @@ class FundacionController extends Controller
      */
     public function solicitudesAdopcion()
     {
-        $solicitudes = SolicitudAdopcion::where('fundacion_id', Auth::id())
+        // Obtener la fundación del usuario autenticado
+        $fundacion = PerfilFundacion::where('usuario_id', Auth::id())->firstOrFail();
+        
+        $solicitudes = SolicitudAdopcion::where('fundacion_id', $fundacion->id)
             ->with(['usuario', 'animal'])
             ->latest()
             ->paginate(10);
@@ -329,8 +335,11 @@ class FundacionController extends Controller
         ]);
 
         try {
+            // Obtener la fundación del usuario autenticado
+            $fundacion = PerfilFundacion::where('usuario_id', Auth::id())->firstOrFail();
+            
             $solicitud = SolicitudAdopcion::where('id', $id)
-                ->where('fundacion_id', Auth::id())
+                ->where('fundacion_id', $fundacion->id)
                 ->firstOrFail();
                 
             $solicitud->update($request->only(['estado', 'respuesta']));
@@ -359,9 +368,12 @@ class FundacionController extends Controller
                 return back()->with('error', 'Estado no válido');
             }
             
+            // Obtener la fundación del usuario autenticado
+            $fundacion = PerfilFundacion::where('usuario_id', Auth::id())->firstOrFail();
+            
             // Buscar la solicitud
             $solicitud = SolicitudAdopcion::where('id', $id)
-                ->where('fundacion_id', Auth::id())
+                ->where('fundacion_id', $fundacion->id)
                 ->firstOrFail();
                 
             // Actualizar el estado
@@ -389,8 +401,11 @@ class FundacionController extends Controller
      */
     public function detalleSolicitud($id)
     {
+        // Obtener la fundación del usuario autenticado
+        $fundacion = PerfilFundacion::where('usuario_id', Auth::id())->firstOrFail();
+        
         $solicitud = SolicitudAdopcion::with(['usuario', 'animal', 'fundacion'])
-            ->where('fundacion_id', Auth::id())
+            ->where('fundacion_id', $fundacion->id)
             ->findOrFail($id);
             
         return view('fundacion.solicitudes.detalle', compact('solicitud'));
@@ -402,8 +417,11 @@ class FundacionController extends Controller
     public function marcarComoAdoptado($id)
     {
         try {
+            // Obtener la fundación del usuario autenticado
+            $fundacion = PerfilFundacion::where('usuario_id', Auth::id())->firstOrFail();
+            
             $animal = Animal::where('id', $id)
-                ->where('fundacion_id', Auth::id())
+                ->where('fundacion_id', $fundacion->id)
                 ->firstOrFail();
                 
             $animal->update(['estado' => 'adoptado']);
@@ -421,8 +439,11 @@ class FundacionController extends Controller
      */
     public function editarAnimal($id)
     {
+        // Obtener la fundación del usuario autenticado
+        $fundacion = PerfilFundacion::where('usuario_id', Auth::id())->firstOrFail();
+        
         $animal = Animal::where('id', $id)
-            ->where('fundacion_id', Auth::id())
+            ->where('fundacion_id', $fundacion->id)
             ->firstOrFail();
             
         return view('fundacion.animales.edit', compact('animal'));
@@ -445,8 +466,11 @@ class FundacionController extends Controller
         ]);
 
         try {
+            // Obtener la fundación del usuario autenticado
+            $fundacion = PerfilFundacion::where('usuario_id', Auth::id())->firstOrFail();
+            
             $animal = Animal::where('id', $id)
-                ->where('fundacion_id', Auth::id())
+                ->where('fundacion_id', $fundacion->id)
                 ->firstOrFail();
 
             $animal->update($request->only([
@@ -479,8 +503,11 @@ class FundacionController extends Controller
     {
         try {
             return DB::transaction(function () use ($id) {
+                // Obtener la fundación del usuario autenticado
+                $fundacion = PerfilFundacion::where('usuario_id', Auth::id())->firstOrFail();
+                
                 $animal = Animal::where('id', $id)
-                    ->where('fundacion_id', Auth::id())
+                    ->where('fundacion_id', $fundacion->id)
                     ->with(['solicitudesAdopcion', 'donaciones'])
                     ->firstOrFail();
 
