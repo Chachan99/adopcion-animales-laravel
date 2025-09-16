@@ -27,15 +27,18 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 # Copiar el resto del código de la aplicación
 COPY . .
 
+# Crear directorios necesarios ANTES de composer dump-autoload
+RUN mkdir -p /var/www/html/bootstrap/cache \
+    && mkdir -p /var/www/html/storage/framework/cache/data \
+    && mkdir -p /var/www/html/storage/framework/sessions \
+    && mkdir -p /var/www/html/storage/framework/views \
+    && mkdir -p /var/www/html/storage/logs
+
 # Completar instalación de Composer
 RUN composer dump-autoload --no-dev --optimize
 
-# Configurar permisos y crear directorios de caché
-RUN mkdir -p /var/www/html/storage/framework/cache/data \
-    && mkdir -p /var/www/html/storage/framework/sessions \
-    && mkdir -p /var/www/html/storage/framework/views \
-    && mkdir -p /var/www/html/storage/logs \
-    && chown -R nginx:nginx /var/www/html \
+# Configurar permisos
+RUN chown -R nginx:nginx /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache \
     && chmod -R 777 /var/www/html/storage/framework/cache \
