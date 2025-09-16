@@ -454,6 +454,9 @@ class FundacionController extends Controller
      */
     public function actualizarAnimal(Request $request, $id)
     {
+        // Habilitar logging de consultas para debugging
+        \DB::enableQueryLog();
+        
         $request->validate([
             'nombre' => 'required|string|max:255',
             'tipo' => 'required|string',
@@ -466,33 +469,119 @@ class FundacionController extends Controller
         ]);
 
         try {
-            // Obtener la fundación del usuario autenticado
-            $fundacion = PerfilFundacion::where('usuario_id', Auth::id())->firstOrFail();
-            
-            $animal = Animal::where('id', $id)
-                ->where('fundacion_id', $fundacion->id)
-                ->firstOrFail();
+            return DB::transaction(function () use ($request, $id) {
+                // Obtener la fundación del usuario autenticado
+                $fundacion = PerfilFundacion::where('usuario_id', Auth::id())->firstOrFail();
+                
+                Log::info('Actualizando animal', [
+                    'animal_id' => $id,
+                    'fundacion_id' => $fundacion->id,
+                    'user_id' => Auth::id(),
+                    'input_data' => $request->except(['imagen', '_token'])
+                ]);
+                
+                $animal = Animal::where('id', $id)
+                    ->where('fundacion_id', $fundacion->id)
+                    ->firstOrFail();
 
-            $animal->update($request->only([
-                'nombre', 'tipo', 'edad', 'tipo_edad', 
-                'sexo', 'descripcion', 'estado',
-                'direccion', 'latitud', 'longitud'
-            ]));
+                // Actualizar datos básicos del animal
+                $datosActualizacion = $request->only([
+                    'nombre', 'tipo', 'edad', 'tipo_edad', 
+                    'sexo', 'descripcion', 'estado',
+                    'direccion', 'latitud', 'longitud'
+                ]);
+                
+                $animal->update($datosActualizacion);
+                
+                Log::info('Datos básicos actualizados', [
+                    'animal_id' => $id,
+                    'datos_actualizados' => $datosActualizacion
+                ]);
 
-            if ($request->hasFile('imagen')) {
-                if ($animal->imagen) {
-                    Storage::disk('public')->delete($animal->imagen);
+                // Manejar imagen si se proporciona
+                if ($request->hasFile('imagen')) {
+                    try {
+                        Log::info('Procesando nueva imagen', [
+                            'animal_id' => $id,
+                            'imagen_anterior' => $animal->imagen
+                        ]);
+                        
+                        // Eliminar imagen anterior si existe
+                        if ($animal->imagen) {
+                            try {
+                                Storage::disk('public')->delete($animal->imagen);
+                                Log::info('Imagen anterior eliminada', ['ruta' => $animal->imagen]);
+                            } catch (\Exception $e) {
+                                Log::warning('No se pudo eliminar imagen anterior', [
+                                    'ruta' => $animal->imagen,
+                                    'error' => $e->getMessage()
+                                ]);
+                            }
+                        }
+                        
+                        // Guardar nueva imagen
+                        $rutaImagen = $this->guardarImagen($request->file('imagen'), 'animales');
+                        $animal->imagen = $rutaImagen;
+                        $animal->save();
+                        
+                        Log::info('Nueva imagen guardada', [
+                            'animal_id' => $id,
+                            'ruta_imagen' => $rutaImagen
+                        ]);
+                        
+                    } catch (\Exception $e) {
+                        Log::error('Error al procesar imagen durante actualización', [
+                            'animal_id' => $id,
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                        
+                        // En caso de error con imagen, continuar con la actualización sin imagen
+                        // pero informar al usuario
+                        session()->flash('warning', 'El animal se actualizó correctamente, pero hubo un problema con la imagen. Intenta subirla nuevamente.');
+                    }
                 }
-                $animal->imagen = $this->guardarImagen($request->file('imagen'), 'animales');
-                $animal->save();
-            }
 
-            return redirect()->route('fundacion.animales')
-                ->with('success', 'Animal actualizado exitosamente');
+                // Log de consultas ejecutadas
+                $queries = \DB::getQueryLog();
+                Log::info('Queries ejecutadas en actualización', ['queries' => $queries]);
+
+                return redirect()->route('fundacion.animales')
+                    ->with('success', 'Animal actualizado exitosamente');
+            });
                 
         } catch (\Exception $e) {
-            Log::error('Error al actualizar animal: ' . $e->getMessage());
-            return back()->with('error', 'Error al actualizar el animal');
+            // Get all executed queries before the error
+            $queries = \DB::getQueryLog();
+            
+            // Log detallado del error
+            Log::error('Error al actualizar animal:', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'animal_id' => $id,
+                'user_id' => Auth::id(),
+                'input' => $request->except(['imagen', '_token']),
+                'queries' => $queries
+            ]);
+            
+            $errorMessage = 'Error al actualizar el animal';
+            
+            // Proporcionar mensajes de error más específicos
+            if ($e instanceof \Illuminate\Database\QueryException) {
+                $errorMessage = 'Error en la base de datos al actualizar: ' . $e->getMessage();
+            } elseif ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+                $errorMessage = 'No se encontró el animal o no tienes permisos para editarlo';
+            } elseif (str_contains($e->getMessage(), 'imagen')) {
+                $errorMessage = 'Error al procesar la imagen: ' . $e->getMessage();
+            }
+            
+            return back()->withInput()->with('error', $errorMessage);
+        } finally {
+            // Deshabilitar logging de consultas
+            \DB::disableQueryLog();
         }
     }
 
@@ -588,16 +677,51 @@ class FundacionController extends Controller
     protected function guardarImagen($imagen, $directorio)
     {
         try {
+            // Verificar que el archivo sea válido
+            if (!$imagen || !$imagen->isValid()) {
+                throw new \Exception('El archivo de imagen no es válido');
+            }
+            
+            // Verificar el tamaño del archivo (máximo 2MB)
+            if ($imagen->getSize() > 2048 * 1024) {
+                throw new \Exception('La imagen es demasiado grande. Máximo 2MB permitido');
+            }
+            
+            // Verificar el tipo MIME
+            $tiposPermitidos = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+            if (!in_array($imagen->getMimeType(), $tiposPermitidos)) {
+                throw new \Exception('Tipo de archivo no permitido. Solo se permiten: JPEG, PNG, JPG, GIF');
+            }
+            
+            Log::info('Iniciando guardado de imagen', [
+                'directorio' => $directorio,
+                'nombre_original' => $imagen->getClientOriginalName(),
+                'tamaño' => $imagen->getSize(),
+                'tipo_mime' => $imagen->getMimeType()
+            ]);
+            
             // Crear el directorio si no existe
             $rutaDirectorio = storage_path('app/public/' . $directorio);
             if (!file_exists($rutaDirectorio)) {
+                Log::info('Creando directorio', ['ruta' => $rutaDirectorio]);
                 if (!mkdir($rutaDirectorio, 0755, true)) {
-                    throw new \Exception('No se pudo crear el directorio para guardar la imagen');
+                    throw new \Exception('No se pudo crear el directorio para guardar la imagen: ' . $rutaDirectorio);
                 }
             }
             
+            // Verificar permisos de escritura
+            if (!is_writable($rutaDirectorio)) {
+                throw new \Exception('No hay permisos de escritura en el directorio: ' . $rutaDirectorio);
+            }
+            
             // Generar un nombre único para la imagen
-            $nombreArchivo = uniqid() . '_' . time() . '.' . $imagen->getClientOriginalExtension();
+            $extension = $imagen->getClientOriginalExtension();
+            $nombreArchivo = uniqid() . '_' . time() . '.' . $extension;
+            
+            Log::info('Guardando imagen', [
+                'nombre_archivo' => $nombreArchivo,
+                'ruta_completa' => $rutaDirectorio . '/' . $nombreArchivo
+            ]);
             
             // Guardar la imagen en el almacenamiento
             $ruta = $imagen->storeAs($directorio, $nombreArchivo, 'public');
@@ -606,10 +730,26 @@ class FundacionController extends Controller
                 throw new \Exception('Error al guardar la imagen en el almacenamiento');
             }
             
+            // Verificar que el archivo se guardó correctamente
+            $rutaCompleta = storage_path('app/public/' . $ruta);
+            if (!file_exists($rutaCompleta)) {
+                throw new \Exception('La imagen no se guardó correctamente en: ' . $rutaCompleta);
+            }
+            
+            Log::info('Imagen guardada exitosamente', [
+                'ruta_relativa' => $ruta,
+                'ruta_completa' => $rutaCompleta,
+                'tamaño_final' => filesize($rutaCompleta)
+            ]);
+            
             return $ruta;
             
         } catch (\Exception $e) {
-            Log::error('Error en guardarImagen: ' . $e->getMessage());
+            Log::error('Error en guardarImagen: ' . $e->getMessage(), [
+                'directorio' => $directorio,
+                'archivo_original' => $imagen ? $imagen->getClientOriginalName() : 'null',
+                'trace' => $e->getTraceAsString()
+            ]);
             throw new \Exception('Error al procesar la imagen: ' . $e->getMessage());
         }
     }

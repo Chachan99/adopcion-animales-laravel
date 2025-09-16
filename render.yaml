@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: adopcion-animales
+    env: php
+    plan: free
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      php artisan config:cache
+      php artisan route:cache
+      php artisan view:cache
+      mkdir -p storage/logs
+      mkdir -p storage/app/public/animales
+      mkdir -p storage/app/public/fundaciones
+      mkdir -p storage/app/public/usuarios
+      mkdir -p storage/app/public/noticias
+      mkdir -p storage/framework/cache
+      mkdir -p storage/framework/sessions
+      mkdir -p storage/framework/views
+      chmod -R 775 storage
+      chmod -R 775 bootstrap/cache
+      php artisan storage:link
+    startCommand: |
+      php artisan migrate --force
+      php artisan serve --host=0.0.0.0 --port=$PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: LOG_CHANNEL
+        value: single
+      - key: LOG_LEVEL
+        value: error
+      - key: FILESYSTEM_DISK
+        value: public
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
