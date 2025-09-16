@@ -22,3 +22,13 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Database verification scripts (temporary)
+check-db-render.php
+check-sqlite-local.php
+check-table-structure.php
+verify-database-status.php
+fix-render-migrations.php
+
+# Bootstrap cache
+/bootstrap/cache
