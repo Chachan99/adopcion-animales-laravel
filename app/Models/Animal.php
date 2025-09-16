@@ -126,28 +126,41 @@ class Animal extends Model
         // Limpiar la ruta de la imagen
         $imagenPath = ltrim($this->imagen, '/');
         
-        // Verificar rutas en public/img PRIMERO (donde están las imágenes reales)
-        $publicPaths = [
-            'img/animales/' . $imagenPath,
-            'img/test/' . $imagenPath,
-            'test/' . $imagenPath,
-            $imagenPath
-        ];
-        
-        foreach ($publicPaths as $path) {
-            if (file_exists(public_path($path))) {
-                return asset($path);
+        // Si estamos usando S3, generar URL directamente
+        if (config('filesystems.default') === 's3') {
+            // Verificar si la imagen existe en S3
+            if (Storage::disk('public')->exists($imagenPath)) {
+                return Storage::disk('public')->url($imagenPath);
             }
-        }
-        
-        // Si la imagen está en el storage público de Laravel
-        if (Storage::disk('public')->exists($imagenPath)) {
-            return asset('storage/' . $imagenPath);
-        }
-        
-        // Verificar si la imagen está en animales/ dentro del storage
-        if (Storage::disk('public')->exists('animales/' . $imagenPath)) {
-            return asset('storage/animales/' . $imagenPath);
+            
+            // Verificar si la imagen está en animales/ dentro del storage
+            if (Storage::disk('public')->exists('animales/' . $imagenPath)) {
+                return Storage::disk('public')->url('animales/' . $imagenPath);
+            }
+        } else {
+            // Para almacenamiento local, verificar rutas en public/img PRIMERO
+            $publicPaths = [
+                'img/animales/' . $imagenPath,
+                'img/test/' . $imagenPath,
+                'test/' . $imagenPath,
+                $imagenPath
+            ];
+            
+            foreach ($publicPaths as $path) {
+                if (file_exists(public_path($path))) {
+                    return asset($path);
+                }
+            }
+            
+            // Si la imagen está en el storage público de Laravel
+            if (Storage::disk('public')->exists($imagenPath)) {
+                return asset('storage/' . $imagenPath);
+            }
+            
+            // Verificar si la imagen está en animales/ dentro del storage
+            if (Storage::disk('public')->exists('animales/' . $imagenPath)) {
+                return asset('storage/animales/' . $imagenPath);
+            }
         }
 
         // Si no se encuentra la imagen, devolver imagen por defecto

@@ -68,7 +68,13 @@ class Usuario extends Authenticatable
     public function getImagenUrlAttribute()
     {
         if ($this->imagen) {
-            return asset('storage/usuarios/' . $this->imagen);
+            // Si estamos usando S3, generar URL directamente
+            if (config('filesystems.default') === 's3') {
+                return \Illuminate\Support\Facades\Storage::disk('public')->url('usuarios/' . $this->imagen);
+            } else {
+                // Para almacenamiento local
+                return asset('storage/usuarios/' . $this->imagen);
+            }
         }
         return null;
     }
