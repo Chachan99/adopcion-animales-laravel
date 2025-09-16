@@ -68,17 +68,14 @@ class PerfilFundacion extends Model
         // Limpiar la ruta de la imagen
         $imagenPath = ltrim($this->imagen, '/');
         
-        // Si estamos usando S3, generar URL directamente
+        // Si estamos usando S3, generar URL directamente sin verificar existencia
         if (config('filesystems.default') === 's3') {
-            // Verificar si la imagen existe en S3
-            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($imagenPath)) {
+            // Si la ruta ya incluye el directorio, usar tal como está
+            if (strpos($imagenPath, 'fundaciones/') === 0) {
                 return \Illuminate\Support\Facades\Storage::disk('public')->url($imagenPath);
             }
-            
-            // Verificar si la imagen está en fundaciones/ dentro del storage
-            if (\Illuminate\Support\Facades\Storage::disk('public')->exists('fundaciones/' . $imagenPath)) {
-                return \Illuminate\Support\Facades\Storage::disk('public')->url('fundaciones/' . $imagenPath);
-            }
+            // Si no incluye el directorio, agregarlo
+            return \Illuminate\Support\Facades\Storage::disk('public')->url('fundaciones/' . $imagenPath);
         } else {
             // Para almacenamiento local, verificar rutas en public/img PRIMERO
             $publicPaths = [

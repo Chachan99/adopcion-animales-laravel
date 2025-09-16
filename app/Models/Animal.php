@@ -126,17 +126,14 @@ class Animal extends Model
         // Limpiar la ruta de la imagen
         $imagenPath = ltrim($this->imagen, '/');
         
-        // Si estamos usando S3, generar URL directamente
+        // Si estamos usando S3, generar URL directamente sin verificar existencia
         if (config('filesystems.default') === 's3') {
-            // Verificar si la imagen existe en S3
-            if (Storage::disk('public')->exists($imagenPath)) {
+            // Si la ruta ya incluye el directorio, usar tal como está
+            if (strpos($imagenPath, 'animales/') === 0) {
                 return Storage::disk('public')->url($imagenPath);
             }
-            
-            // Verificar si la imagen está en animales/ dentro del storage
-            if (Storage::disk('public')->exists('animales/' . $imagenPath)) {
-                return Storage::disk('public')->url('animales/' . $imagenPath);
-            }
+            // Si no incluye el directorio, agregarlo
+            return Storage::disk('public')->url('animales/' . $imagenPath);
         } else {
             // Para almacenamiento local, verificar rutas en public/img PRIMERO
             $publicPaths = [
