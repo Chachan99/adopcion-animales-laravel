@@ -12,13 +12,6 @@ class DemoDataSeeder extends Seeder
 {
     public function run()
     {
-        // SEEDER DESHABILITADO - No ejecutar automáticamente
-        echo "⚠️ DemoDataSeeder deshabilitado - No se ejecutará automáticamente\n";
-        echo "💡 Para crear datos de prueba manualmente, usar el controlador de diagnóstico\n";
-        return;
-        
-        // Código comentado para referencia futura
-        /*
         // ADVERTENCIA: Este seeder es solo para datos de prueba/desarrollo
         // NO debe ejecutarse automáticamente en producción
         if (app()->environment('production')) {
@@ -33,7 +26,6 @@ class DemoDataSeeder extends Seeder
         }
 
         echo "🔧 Ejecutando DemoDataSeeder (solo desarrollo/testing)...\n";
-        */
         // Crear usuarios fundación de prueba
         $fundacionUserId = DB::table('usuarios')->insertGetId([
             'nombre' => 'Fundación Patitas Felices',

@@ -27,12 +27,8 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 # Copiar el resto del código de la aplicación
 COPY . .
 
-# Crear directorio bootstrap/cache antes de composer dump-autoload
-RUN mkdir -p /var/www/html/bootstrap/cache
-
-# Completar instalación de Composer con permisos de superusuario
-ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer dump-autoload --no-dev --optimize --no-scripts
+# Completar instalación de Composer
+RUN composer dump-autoload --no-dev --optimize
 
 # Configurar permisos y crear directorios de caché
 RUN mkdir -p /var/www/html/storage/framework/cache/data \
