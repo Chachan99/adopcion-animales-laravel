@@ -43,20 +43,15 @@ class DiagnosticoController extends Controller
                     
                     $animalPrueba = new Animal([
                         'nombre' => 'Test Diagnóstico ' . time(),
-                        'especie' => 'perro',
+                        'tipo' => 'perro',
                         'raza' => 'Mestizo',
                         'edad' => 2,
                         'tipo_edad' => 'años',
                         'sexo' => 'macho',
-                        'tamaño' => 'mediano',
                         'descripcion' => 'Animal de prueba para diagnóstico',
-                        'estado_salud' => 'saludable',
-                        'vacunado' => true,
-                        'esterilizado' => false,
-                        'ubicacion' => 'Ciudad de prueba',
                         'direccion' => 'Dirección de prueba',
                         'fundacion_id' => $primeraFundacion->id,
-                        'disponible' => true
+                        'estado' => 'adopcion'
                     ]);
                     
                     $animalPrueba->save();
