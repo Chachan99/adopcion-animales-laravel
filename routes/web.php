@@ -6,6 +6,7 @@ use App\Http\Controllers\AdopcionController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\AnimalController;
+use App\Http\Controllers\DiagnosticoController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -407,3 +408,7 @@ Route::prefix('panel-fundacion')
         // Rutas de prueba (puedes eliminarlas en producción)
         Route::get('/prueba', function() { return 'Ruta de prueba fundación'; });
     });
+
+// Rutas de diagnóstico para Render (accesibles sin autenticación)
+Route::get('/diagnostico-animales', [\App\Http\Controllers\DiagnosticoController::class, 'diagnosticoAnimales'])->name('diagnostico.animales');
+Route::get('/ejecutar-seeders', [\App\Http\Controllers\DiagnosticoController::class, 'ejecutarSeeders'])->name('diagnostico.seeders');
